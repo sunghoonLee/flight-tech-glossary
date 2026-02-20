@@ -4,12 +4,25 @@ Amadeus `PNR_AddMultiElements` API(버전 22.1)의 기술 용어를 정리한 �
 
 ---
 
+!!! info "WBS Integration Flow Step 8"
+    이 API는 [WBS Integration Flow](amadeus-wbs-integration-flow.md)의 **예약 생성 단계 Step 8**에 해당합니다.
+
+---
+
 ## 1. 개요
 
 **PNR_AddMultiElements**는 항공 예약 시스템(GDS)에서 PNR을 생성하고 관리하는 Amadeus의 핵심 API입니다.
 
 - **Query**: 승객 정보, 여정(항공 구간), 데이터 요소(SSR, OSI, Remarks, FOP, TK 등)를 PNR에 추가하거나 수정
 - **Reply**: 처리 결과로 완성된 PNR 이미지(PNR_Reply) 반환
+
+| 항목 | 내용 |
+|------|------|
+| API 명 | `PNR_AddMultiElements` |
+| 플로우 단계 | Step 8 -- 예약 생성 |
+| 목적 | PNR에 승객 정보, SSR, 연락처 등 추가 후 저장 (Commit) |
+| 이전 단계 | [Air_SellFromRecommendation](air-sell-from-recommendation.md) |
+| 다음 단계 | [FOP_CreateFormOfPayment](fop-create-form-of-payment.md) |
 
 !!! info "용도"
     - PNR 최초 생성 (승객 이름 + 여정 + 필수 요소 추가 후 EOT)
@@ -722,7 +735,10 @@ Ticket Element의 발권 유형을 지정합니다.
 
 ---
 
-!!! tip "관련 문서"
-    - [Air SellFromRecommendation](air-sell-from-recommendation.md) - 검색 결과 기반 예약 생성 (PNR 생성 전 좌석 확보)
-    - [BSP 정산 가이드](bsp-settlement-guide.md) - PNR 기반 발권 및 정산 프로세스
-    - [GDS 용어집](gds-terminology.md) - GDS 시스템 공통 용어
+## 참고
+
+- [WBS Integration Flow - Step 8](amadeus-wbs-integration-flow.md)
+- [Air_SellFromRecommendation 용어집](air-sell-from-recommendation.md)
+- [FOP_CreateFormOfPayment 용어집](fop-create-form-of-payment.md)
+- [PNR_Retrieve 용어집](pnr-retrieve.md)
+- [BSP 정산 가이드](bsp-settlement-guide.md)

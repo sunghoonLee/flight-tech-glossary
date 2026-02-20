@@ -4,12 +4,25 @@ Amadeus `Air_SellFromRecommendation` API(버전 05.2)의 기술 용어를 정리
 
 ---
 
+!!! info "WBS Integration Flow Step 7"
+    이 API는 [WBS Integration Flow](amadeus-wbs-integration-flow.md)의 **예약 생성 단계 Step 7**에 해당합니다.
+
+---
+
 ## 1. 개요
 
 **Air_SellFromRecommendation**은 항공편 검색 결과에서 선택한 여정을 실제 GDS 인벤토리에 Sell(판매/확약)하는 Amadeus API입니다.
 
 - **Request**: 검색 결과의 항공편 정보(편명, 날짜, 클래스 등)와 승객 수, 액션 코드를 전달
 - **Reply**: 각 구간의 예약 확정 상태(HK/NN 등)와 운항 세부 정보 반환
+
+| 항목 | 내용 |
+|------|------|
+| API 명 | `Air_SellFromRecommendation` |
+| 플로우 단계 | Step 7 -- 예약 생성 |
+| 목적 | 선택한 항공편의 좌석 확보 (Sell) |
+| 이전 단계 | [MiniRule_GetFromRec](minirule-get-from-rec.md) |
+| 다음 단계 | [PNR_AddMultiElements](pnr-add-multi-elements.md) |
 
 !!! info "용도"
     검색(MPTBS) → **판매(SellFromRecommendation)** → PNR 저장의 플로우에서 핵심 단계입니다. 검색 결과의 Recommendation을 그대로 전달하여 예약을 생성하며, 좌석 확보 전 인벤토리 가용성을 실시간으로 확인합니다.
@@ -490,7 +503,9 @@ Reply에서 반환되는 운항 세부 정보입니다.
 
 ---
 
-!!! tip "관련 문서"
-    - [Master Pricer Travelboard Search](master-pricer-travelboard-search.md) - 항공편 검색 API (검색 결과를 SellFromRecommendation에 전달)
-    - [Air FlightInfo](air-flightinfo.md) - 항공편 상세 정보 조회
-    - [GDS 용어집](gds-terminology.md) - GDS 시스템 공통 용어
+## 참고
+
+- [WBS Integration Flow - Step 7](amadeus-wbs-integration-flow.md)
+- [Master Pricer Travelboard Search 용어집](master-pricer-travelboard-search.md)
+- [PNR_AddMultiElements 용어집](pnr-add-multi-elements.md)
+- [Air FlightInfo 용어집](air-flightinfo.md)

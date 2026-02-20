@@ -7,6 +7,11 @@
 
 ---
 
+!!! info "WBS Integration Flow Step 9"
+    이 API는 [WBS Integration Flow](amadeus-wbs-integration-flow.md)의 **예약 생성 단계 Step 9**에 해당합니다.
+
+---
+
 ## 1. 개요
 
 ### FOP_CreateFormOfPayment
@@ -41,11 +46,10 @@ Amadeus GDS에서 PNR에 **결제 수단(Form of Payment)을 생성**하는 API.
 | **Query** | `FOP_CreateFormOfPayment 19.2.1A` | PNR에 결제 수단 생성 (요청) |
 | **Reply** | `FOP_CreateFormOfPaymentReply 19.2.1A` | FOP 데이터 읽기 (응답) |
 
-### WBS Integration Flow 위치
-
 | 항목 | 내용 |
 |------|------|
-| 플로우 단계 | **Step 9** -- 예약 생성 |
+| API 명 | `FOP_CreateFormOfPayment` |
+| 플로우 단계 | Step 9 -- 예약 생성 |
 | 목적 | 신용카드 등 결제 수단 등록 및 FortKnox 토큰 발급 |
 | 이전 단계 | [PNR_AddMultiElements](pnr-add-multi-elements.md) |
 | 다음 단계 | [Fare_PricePNRWithBookingClass](fare-price-pnr-with-booking-class.md) |
@@ -883,3 +887,12 @@ FOP_CreateFormOfPayment 기술 문서에서 사용되는 **메시지 구조 정�
 | **VCC** | Virtual Credit Card | 가상 신용카드 |
 | **NOX** | Non-sensitive Encrypted ID | FortKnox 카드 번호 토큰 ID |
 | **EDIFACT** | Electronic Data Interchange For Administration, Commerce and Transport | 전자 데이터 교환 표준 |
+
+---
+
+## 참고
+
+- [WBS Integration Flow - Step 9](amadeus-wbs-integration-flow.md)
+- [PNR_AddMultiElements 용어집](pnr-add-multi-elements.md)
+- [Fare_PricePNRWithBookingClass 용어집](fare-price-pnr-with-booking-class.md)
+- [BSP 정산 가이드](bsp-settlement-guide.md)

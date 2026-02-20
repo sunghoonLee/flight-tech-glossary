@@ -6,6 +6,11 @@ Amadeus의 항공편 검색 및 운임 조회 API인 `Fare_MasterPricerTravelBoa
 
 ---
 
+!!! info "WBS Integration Flow Step 2"
+    이 API는 [WBS Integration Flow](amadeus-wbs-integration-flow.md)의 **검색 단계 Step 2**에 해당합니다.
+
+---
+
 ## 1. 개요
 
 ### Master Pricer Travelboard Search
@@ -36,6 +41,14 @@ Amadeus GDS가 제공하는 **항공편 검색 + 최저가 운임 조회 API**. 
 |------|--------|------|
 | **Query** | `Fare_MasterPricerTravelBoardSearch` | 검색 조건 입력 (요청) |
 | **Reply** | `Fare_MasterPricerTravelBoardSearchReply` | 검색 결과 반환 (응답) |
+
+| 항목 | 내용 |
+|------|------|
+| API 명 | `Fare_MasterPricerTravelBoardSearch` |
+| 플로우 단계 | Step 2 -- 검색 |
+| 목적 | 확정 날짜의 항공편 + 운임 조합 상세 검색 |
+| 이전 단계 | [Fare_MasterPricerCalendar](fare-master-pricer-calendar.md) |
+| 다음 단계 | [Fare_InformativeBestPricingWithoutPNR](fare-informative-best-pricing.md) |
 
 ---
 
@@ -516,3 +529,12 @@ MPTBS 기술 문서에서 사용되는 **메시지 구조 정의 용어**.
 | **ATPCO** | Airline Tariff Publishing Company | 항공 운임 데이터 제공 기관 |
 | **FOP** | Form of Payment | 결제 수단 |
 | **MNR** | Mini Rules | 운임 규정 요약 |
+
+---
+
+## 참고
+
+- [WBS Integration Flow - Step 2](amadeus-wbs-integration-flow.md)
+- [Fare_MasterPricerCalendar 용어집](fare-master-pricer-calendar.md)
+- [Fare_InformativeBestPricingWithoutPNR 용어집](fare-informative-best-pricing.md)
+- [Fare_InformativePricingWithoutPNR 용어집](fare-informative-pricing.md)

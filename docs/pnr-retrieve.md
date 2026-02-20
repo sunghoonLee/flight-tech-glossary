@@ -4,12 +4,25 @@ Amadeus `PNR_Retrieve` API(버전 21.1)의 기술 용어를 정리한 문서입�
 
 ---
 
+!!! info "WBS Integration Flow Step 11-12"
+    이 API는 [WBS Integration Flow](amadeus-wbs-integration-flow.md)의 **발권 단계 Step 11 (발권 전 최종 확인)** 및 **Step 12 (발권 후 항공권 번호 확인)**에 해당합니다.
+
+---
+
 ## 1. 개요
 
 **PNR_Retrieve**는 Amadeus GDS에 저장된 PNR(Passenger Name Record)을 조회하는 핵심 API입니다.
 
 - **Query**: 조회 유형(Record Locator, 이름+오피스, FF번호 등)과 검색 조건을 지정
 - **Reply**: PNR의 전체 이미지(승객, 여정, SSR, 발권, Remarks 등)를 반환
+
+| 항목 | 내용 |
+|------|------|
+| API 명 | `PNR_Retrieve` |
+| 플로우 단계 | Step 11 -- 발권 전 확인, Step 12 -- 발권 후 확인 |
+| 목적 | PNR 전체 이미지 조회 (발권 전 검증 / 발권 후 항공권 번호 확인) |
+| 이전 단계 | [Fare_PricePNRWithBookingClass](fare-price-pnr-with-booking-class.md) |
+| 다음 단계 | [SalesReports_DisplayQueryReport](sales-reports.md) |
 
 !!! info "용도"
     PNR 생성(`PNR_AddMultiElements`) 이후 PNR 내용 확인, 발권 전 검증, 예약 변경 전 현황 파악, 체크인 연동 등에 활용됩니다. Reply는 SBR(Single Booking Record) 전체 이미지를 담습니다.
@@ -622,8 +635,10 @@ PNR_Retrieve 문서에서 사용되는 데이터 형식 표기 규칙입니다.
 
 ---
 
-!!! tip "관련 문서"
-    - [PNR AddMultiElements](pnr-add-multi-elements.md) - PNR 요소 추가/수정 API
-    - [Air SellFromRecommendation](air-sell-from-recommendation.md) - 검색 결과 기반 예약 생성
-    - [BSP 정산 가이드](bsp-settlement-guide.md) - PNR 기반 발권 및 정산 프로세스
-    - [GDS 용어집](gds-terminology.md) - GDS 시스템 공통 용어
+## 참고
+
+- [WBS Integration Flow - Step 11-12](amadeus-wbs-integration-flow.md)
+- [Fare_PricePNRWithBookingClass 용어집](fare-price-pnr-with-booking-class.md)
+- [PNR_AddMultiElements 용어집](pnr-add-multi-elements.md)
+- [SalesReports_DisplayQueryReport 용어집](sales-reports.md)
+- [Cancellation Flow 용어집](cancellation-flow.md)
