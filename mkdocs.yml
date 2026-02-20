@@ -62,12 +62,27 @@ nav:
     - BSP 정산 가이드: bsp-settlement-guide.md
   - Amadeus:
     - WBS Integration Flow: amadeus-wbs-integration-flow.md
-    - Master Pricer Travelboard Search: master-pricer-travelboard-search.md
-    - Air FlightInfo: air-flightinfo.md
-    - Air SellFromRecommendation: air-sell-from-recommendation.md
-    - Fare GetFareRules: fare-get-fare-rules.md
-    - PNR AddMultiElements: pnr-add-multi-elements.md
-    - PNR Retrieve: pnr-retrieve.md
+    - 검색:
+      - Fare_MasterPricerCalendar: fare-master-pricer-calendar.md
+      - Fare_MasterPricerTravelBoardSearch: master-pricer-travelboard-search.md
+    - 가격 조회 및 규정 확인:
+      - Fare_InformativeBestPricingWithoutPNR: fare-informative-best-pricing.md
+      - Fare_InformativePricingWithoutPNR: fare-informative-pricing.md
+      - Fare_CheckRules: fare-check-rules.md
+      - Fare_GetFareRules: fare-get-fare-rules.md
+      - MiniRule_GetFromRec: minirule-get-from-rec.md
+    - 예약 생성:
+      - Air_SellFromRecommendation: air-sell-from-recommendation.md
+      - PNR_AddMultiElements: pnr-add-multi-elements.md
+      - FOP_CreateFormOfPayment: fop-create-form-of-payment.md
+    - 발권:
+      - Fare_PricePNRWithBookingClass: fare-price-pnr-with-booking-class.md
+      - PNR_Retrieve: pnr-retrieve.md
+    - 후속 처리:
+      - SalesReports: sales-reports.md
+      - Cancellation Flow: cancellation-flow.md
+    - 기타:
+      - Air FlightInfo: air-flightinfo.md
   - 용어 색인: glossary.md
 
 extra:
