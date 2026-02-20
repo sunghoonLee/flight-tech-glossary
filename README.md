@@ -6,11 +6,13 @@ https://sunghoonlee.github.io/flight-tech-glossary/
 
 ## 카테고리
 
-| 카테고리 | 설명 |
-|---------|------|
-| GDS 용어집 | Sabre & Amadeus GDS 시스템 용어 |
-| BSP 정산 가이드 | IATA BSP 정산 프로세스 전체 가이드 |
-| 용어 색인 | 전체 용어 알파벳순 색인 |
+| 카테고리 | 설명 | 주요 키워드 |
+|---------|------|------------|
+| GDS 용어집 | Sabre & Amadeus GDS 시스템 용어 | PNR, PCC, OID, BSP, Webservice, WSAP |
+| BSP 정산 가이드 | IATA BSP 정산 프로세스 전체 가이드 | ADM, ACM, DSR, Billing, NDC, RBD |
+| Master Pricer Travelboard Search | Amadeus 항공편 검색 API 기술 용어 | MPTBS, Recommendation, Fare Family, Mini Rules |
+| Air FlightInfo | Amadeus 항공편 정보 조회 API 기술 용어 | FLIFO, Marriage Segment, Equipment, Meal Service |
+| 용어 색인 | 전체 용어 알파벳순 색인 | A-Z |
 
 ## 용어 추가 방법
 
@@ -20,10 +22,13 @@ https://sunghoonlee.github.io/flight-tech-glossary/
 
 ```
 docs/
-├── index.md                 # 홈
-├── gds-terminology.md       # GDS 용어집
-├── bsp-settlement-guide.md  # BSP 정산 가이드
-└── glossary.md              # 용어 색인
+├── index.md                            # 홈
+├── gds-terminology.md                  # GDS 용어집
+├── bsp-settlement-guide.md             # BSP 정산 가이드
+├── master-pricer-travelboard-search.md # MPTBS 용어
+├── air-flightinfo.md                   # Air FlightInfo 용어
+├── glossary.md                         # 용어 색인
+└── (새 문서).md                         # 새 카테고리 추가
 ```
 
 ## 로컬 개발
