@@ -1,0 +1,67 @@
+site_name: Travel Tech Glossary
+site_description: 항공·여행 기술 용어 사전
+site_url: https://sunghoonLee.github.io/travel-tech-glossary/
+repo_url: https://github.com/sunghoonLee/travel-tech-glossary
+repo_name: sunghoonLee/travel-tech-glossary
+
+theme:
+  name: material
+  language: ko
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: 다크 모드로 전환
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: 라이트 모드로 전환
+  font:
+    text: Noto Sans KR
+    code: JetBrains Mono
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - toc.follow
+
+plugins:
+  - search:
+      lang:
+        - ko
+        - en
+
+markdown_extensions:
+  - tables
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - toc:
+      permalink: true
+  - attr_list
+  - def_list
+
+nav:
+  - Home: index.md
+  - GDS 용어집: gds-terminology.md
+  - BSP 정산 가이드: bsp-settlement-guide.md
+  - 용어 색인: glossary.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/sunghoonLee/travel-tech-glossary
