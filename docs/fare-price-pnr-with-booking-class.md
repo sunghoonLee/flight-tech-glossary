@@ -3,17 +3,51 @@
 PNR의 항공편 세그먼트를 기반으로 운임을 계산하고 **TST(Transitional Stored Ticket)를 생성**하는 API 용어집입니다.
 발권 직전 단계에서 최종 운임을 확정하고 저장하는 역할을 합니다.
 
+> 기반 문서: Fare_PricePNRWithBookingClass 18.1 Technical Reference
+
 !!! info "WBS Integration Flow Step 10"
     이 API는 [WBS Integration Flow](amadeus-wbs-integration-flow.md)의 **발권 단계 Step 10**에 해당합니다.
 
 ---
 
-!!! warning "추후 업데이트 예정"
-    상세 용어 정리는 추후 업데이트될 예정입니다.
+## 1. 개요
 
----
+### Fare_PricePNRWithBookingClass
 
-## 개요
+Amadeus GDS가 제공하는 **PNR 운임 계산 + TST 생성 API**. PNR에 저장된 항공편 세그먼트와 승객 정보를 기반으로 운임을 산출하고, 발권에 필요한 TST(Transitional Stored Ticket)를 생성한다. Cryptic 명령어 `FXP`에 해당한다.
+
+```
+[Query: 운임 계산 요청 (TPCBRQ)]
+  PNR 세그먼트 + 가격 옵션
+       │
+       ▼
+  Amadeus Fare Engine
+       │
+       ▼
+[Reply: 운임 계산 결과 (TPCBRR)]
+  fareList × N개 (승객/구간별)
+  ├─ pricingInformation: TST 유형/지표
+  ├─ fareReference: TST 참조 번호
+  ├─ fareIndicators: FCMI, 판매/발권 지표
+  ├─ lastTktDate: 최종 발권 기한
+  ├─ validatingCarrier: 발권 항공사
+  ├─ fareDataInformation: 운임 금액 상세 (Base/Tax/Total)
+  ├─ taxInformation: 세금 내역 (최대 120건)
+  ├─ fareComponentDetailsGroup: 운임 구성요소 (FCA)
+  ├─ bagAllowanceInformation: 수하물 허용량
+  ├─ feeBreakdown: OB Fee 내역
+  ├─ automaticReissueInfo: 자동 재발행 정보
+  └─ warningInformation: 경고 메시지
+```
+
+### Query / Reply 구조
+
+| 구분 | EDIFACT 메시지명 | Cryptic | 설명 |
+|------|-----------------|---------|------|
+| **Query** | `TPCBRQ` | `FXP` | 운임 계산 요청 |
+| **Reply** | `TPCBRR` | — | 운임 계산 결과 반환 |
+
+### 플로우 위치
 
 | 항목 | 내용 |
 |------|------|
@@ -25,7 +59,934 @@ PNR의 항공편 세그먼트를 기반으로 운임을 계산하고 **TST(Trans
 
 ---
 
+## 2. Query 주요 구조 (운임 계산 요청)
+
+### pricingOptionGroup
+
+운임 계산 시 적용할 **가격 옵션**을 지정하는 구조. 최대 100개 그룹까지 반복 가능하며, 각 그룹은 옵션 키와 상세 정보로 구성된다.
+
+```
+pricingOptionGroup (최대 100회 반복)
+├─ pricingOptionKey: 옵션 키 (어떤 종류의 옵션인지)
+│   └─ pricingOptionKey: 속성 키 코드 (예: RP, ET, VC ...)
+├─ optionDetail: 옵션 상세 값
+│   └─ criteriaDetails
+│       ├─ attributeType: 속성 유형
+│       └─ attributeDescription: 속성 설명/값
+├─ carrierInformation: 항공사 정보
+│   └─ companyIdentification
+│       └─ otherCompany: 항공사 코드
+├─ currency: 통화 정보
+│   └─ firstCurrencyDetails
+│       └─ currencyQualifier / currencyIsoCode
+├─ dateInformation: 날짜 정보
+│   └─ dateAndTimeDetails
+│       ├─ qualifier: 날짜 유형
+│       ├─ date: 날짜 값
+│       └─ time: 시간 값
+├─ formOfPaymentInformation: 결제 수단 정보
+│   └─ formOfPayment
+│       ├─ type: FOP 유형 (CA, CC, CK 등)
+│       └─ creditCardNumber / freetext
+├─ frequentFlyerInformation: 상용고객 정보
+├─ monetaryInformation: 금액 정보
+├─ taxInformation: 세금 옵션
+├─ paxSegTstReference: 승객/세그먼트/TST 참조
+│   └─ referenceDetails
+│       ├─ type: 참조 유형 (P=승객, S=세그먼트, TST)
+│       └─ value: 참조 값
+└─ penDisInformation: 할인/패널티 정보
+    └─ discountPenaltyDetails
+        ├─ rate: 할인율
+        └─ amount: 금액
+```
+
+### pricingOptionKey (속성 키) — 전체 코드셋
+
+운임 계산 시 적용할 옵션의 종류를 지정하는 코드. Query 요청에서 핵심적인 역할을 한다.
+
+| 코드 | 설명 |
+|------|------|
+| **AC** | Add Country taxes — 국가세 추가 |
+| **AT** | Add Tax — 특정 세금 추가 |
+| **AWD** | Award pricing — 마일리지 항공권 가격 계산 |
+| **BK** | Booking class override — 예약 클래스 강제 변경 |
+| **BND** | Brand — Fare Family(브랜드 운임) 지정 |
+| **CC** | Credit Card — 신용카드 정보 지정 |
+| **CMP** | Companions — 동반자 할인 가격 계산 |
+| **CON** | Connection override — 연결 지점(환승) 재지정 |
+| **DAT** | Date override — 날짜 강제 지정 (출발일/발권일 등) |
+| **DIA** | Diagnostic — 진단 모드 (디버깅용 상세 정보 출력) |
+| **DO** | Booking date override — 예약 일자 강제 변경 |
+| **ET** | E-Ticket — 전자 발권 가능 운임만 조회 |
+| **FBA** | Fare Basis override — Fare Basis 강제 적용 |
+| **FBL** | Force Fare Basis — Fare Basis 강제 지정 (자동 운임 검색 비활성화) |
+| **FBP** | Force Break Point — 운임 계산 중단점 강제 지정 |
+| **FCO** | Fare Currency Override — 운임 통화 강제 변경 |
+| **FCS** | Fare Currency Selection — 운임 통화 선택 |
+| **FOP** | Form of Payment — 결제 수단 지정 |
+| **GRI** | Global Route Indicator — 글로벌 경로 지표 (AP, AT, EH, FE, PA, PO, RU, SA, TS, WH 등) |
+| **IP** | Instant Pricing — 즉시 가격 계산 모드 |
+| **MA** | Mileage Accrual — 마일리지 적립 정보 포함 |
+| **MBT** | Fare amount override (Money/Best) — 운임 금액 강제 지정 |
+| **MC** | Miles/Cash — 마일리지+현금 조합 운임 |
+| **MIT** | Multi-ticket — 복수 항공권 운임 계산 |
+| **NBP** | No Break Point — 중단점 없이 연속 운임 계산 |
+| **NF** | No Fee — 수수료 없는 운임만 조회 |
+| **NOP** | No Option — 옵션 없음 (기본 가격 계산) |
+| **OBF** | OB Fee — OB 수수료 관련 옵션 |
+| **PAX** | Passenger type — 승객 유형 지정 (ADT, CHD, INF 등) |
+| **PFF** | Pricing by Fare Family — Fare Family(브랜드) 기준 가격 계산 |
+| **PL** | Price List — 가격 목록 생성 |
+| **POS** | Point of Sale — 판매 지점 재지정 |
+| **POT** | Point of Ticketing — 발권 지점 재지정 |
+| **PRM** | Promo — 프로모션 운임 코드 지정 |
+| **PRO** | Promotional Fare — 프로모션 운임 적용 |
+| **PTA** | Price To All — 모든 승객에게 동일 운임 적용 |
+| **PTC** | Passenger Type Code — 승객 유형 코드 강제 지정 |
+| **RC** | Corporate Fare — 기업 계약 운임 |
+| **RLI** | Route Leg Indicator — 경로 구간 지표 |
+| **RLO** | Return Lowest — 최저가 반환 |
+| **RN** | Negotiated Fare — 협상 운임 |
+| **RP** | Published Fare — 공시 운임 |
+| **RU** | Unifares — 통합 운임 (공시+사설 운임 모두 검색) |
+| **RW** | Lowest Fare — 최저가 운임 |
+| **SEL** | Selection — 선택 항목 지정 |
+| **STO** | Stopover — 도중 체류(Stopover) 옵션 |
+| **TKT** | Ticket Designator — 항공권 지정자 |
+| **TRS** | Transitional Stored Ticket — TST 옵션 |
+| **VC** | Validating Carrier — 발권 항공사 강제 지정 |
+| **WC** | Withhold Country taxes — 국가세 제외 |
+| **WQ** | Withhold Q surcharge — Q 할증료 제외 |
+| **WT** | Withhold Tax — 특정 세금 제외 |
+| **ZAP** | ZAP-off discount — ZAP-off 할인 적용 (에이전트 할인) |
+
+### optionDetail (속성 유형 코드)
+
+`attributeType`에 사용되는 주요 값:
+
+| 코드 | 설명 |
+|------|------|
+| **REVAL** | Revalidation — 재확인/재검증 |
+| **WAIV** | Waiver — 면제 (패널티 면제 등) |
+| **COM** | Commission — 수수료율 |
+| **END** | Endorsement — 배서 사항 |
+| **FCA** | Fare Calculation — 수평 운임 계산 (Horizontal Fare Calculation) |
+| **MIL** | Mileage — 마일리지 관련 |
+| **PAY** | Payment — 결제 관련 |
+| **TOU** | Tour Code — 투어 코드 |
+
+---
+
+## 3. Reply 주요 구조 (운임 계산 결과)
+
+### 최상위 구조
+
+```
+Reply (TPCBRR)
+├─ applicationError: 오류 정보 (조건부)
+│   ├─ applicationErrorInfo: 오류 코드/유형
+│   └─ errorText: 오류 메시지 텍스트
+├─ pnrLocatorData: PNR 레코드 로케이터
+│   └─ reservationInformation
+│       └─ controlNumber: PNR 번호 (6자리)
+└─ fareList: 운임 목록 (최대 999회 반복) ★
+    ├─ pricingInformation
+    ├─ fareReference
+    ├─ fareIndicators
+    ├─ lastTktDate
+    ├─ validatingCarrier
+    ├─ paxSegReference
+    ├─ fareDataInformation
+    ├─ offerReferences
+    ├─ taxInformation (최대 120회)
+    ├─ bankerRates
+    ├─ passengerInformation
+    ├─ originDestination (최대 6회)
+    ├─ segmentInformation (최대 96회)
+    ├─ fareQualifier
+    ├─ cabinGroup (최대 99회)
+    ├─ bagAllowanceInformation (최대 99회)
+    ├─ otherPricingInfo (최대 99회)
+    ├─ warningInformation (최대 99회)
+    ├─ automaticReissueInfo
+    ├─ corporateInfo
+    ├─ feeBreakdown (최대 99회)
+    ├─ mileage
+    ├─ fareComponentDetailsGroup (최대 99회)
+    └─ endFareList: fareList 종료 마커
+```
+
+### fareList
+
+운임 계산 결과의 **핵심 반복 구조**. 승객 유형/구간 조합별로 최대 999회 반복된다. 하나의 fareList는 하나의 TST에 대응한다.
+
+---
+
+## 4. TST (Transitional Stored Ticket) 생성
+
+### pricingInformation — TST 지표
+
+TST의 **유형과 속성**을 정의하는 구조.
+
+| 필드 | 설명 |
+|------|------|
+| `tstInformation.tstIndicator` | TST 유형 코드 |
+| `tstInformation.bestFareType` | Best Fare TST 생성 시 원래 운임 유형 |
+| `tstInformation.salesIndicator` | 판매/발권 지점 지표 |
+
+#### tstIndicator (TST 유형 코드)
+
+TST가 **어떤 방식으로 생성되었는지** 나타내는 코드. 운임의 성격과 유효성 판단에 핵심적이다.
+
+| 코드 | 설명 |
+|------|------|
+| **A** | ATAF TST — ATAF 시스템 생성 |
+| **B** | Negotiated fare (manually updated) — 사설 운임 (수동 수정) |
+| **F** | Negotiated fare (airline loaded) — 사설 운임 (항공사 등록) |
+| **G** | Negotiated fare (agent loaded) — 사설 운임 (에이전트 등록) |
+| **I** | IATA fare — IATA 공시 운임 |
+| **M** | Manual TST — 수동 생성 TST |
+| **N** | Not validated — 미검증 TST |
+| **O** | RBD override — 예약 클래스 강제 변경 TST |
+| **T** | Inclusive Tour — 포괄 여행 운임 TST |
+| **W** | Ignore itinerary at ticket issuance — 발권 시 여정 무시 |
+
+#### salesIndicator (판매/발권 지점 지표)
+
+운임이 산출된 **판매 지점과 발권 지점의 조합**을 나타낸다.
+
+| 코드 | 설명 |
+|------|------|
+| **II** | Sold In / Ticket In — 판매국 내 판매, 판매국 내 발권 |
+| **IO** | Sold In / Ticket Out — 판매국 내 판매, 타국 발권 |
+| **OI** | Sold Out / Ticket In — 타국 판매, 판매국 내 발권 |
+| **OO** | Sold Out / Ticket Out — 타국 판매, 타국 발권 |
+
+### fareReference — TST 참조 번호
+
+TST의 **고유 식별 번호**를 포함하는 구조.
+
+| 필드 | 설명 |
+|------|------|
+| `referenceType` | 참조 유형 (TST) |
+| `uniqueReference` | TST 고유 번호 |
+
+### fareIndicators — 운임 지표
+
+운임의 **계산 방식과 분류**를 나타내는 지표.
+
+| 필드 | 설명 |
+|------|------|
+| `fareIndicators.fareDataMainInformation.fareDataQualifier` | 운임 데이터 한정자 |
+| `fareIndicators.fareDataMainInformation.fareAmount` | 운임 금액 |
+| `fareIndicators.fareDataMainInformation.fareCurrency` | 운임 통화 |
+| `fareIndicators.otherMonetaryInformation` | 기타 금액 정보 |
+
+---
+
+## 5. 운임 금액 상세 (fareDataInformation)
+
+### fareDataMainInformation
+
+운임의 **핵심 금액 정보**를 담는 구조.
+
+| 필드 | 설명 |
+|------|------|
+| `fareDataQualifier` | 금액 유형 한정자 (아래 코드셋 참조) |
+| `fareAmount` | 금액 값 |
+| `fareCurrency` | 통화 코드 (ISO 4217) |
+
+#### fareDataQualifier (금액 유형 코드셋)
+
+TST에 포함되는 **각종 금액의 유형**을 구분하는 코드.
+
+| 코드 | 설명 |
+|------|------|
+| **B** | Base Fare — 기본 운임 (세금 제외 순수 운임) |
+| **E** | Equivalent Fare — 환산 운임 (통화 변환 후 금액) |
+| **TAX** | Tax amount — 세금 금액 |
+| **TFT** | Total Fare amount including Tax — 세금 포함 총 운임 |
+| **TTX** | Total Tax amount — 총 세금 합계 |
+| **702** | PFC amount — Passenger Facility Charge (공항 이용료) |
+| **BFA** | Base Fare Amount — 기본 운임 금액 (상세) |
+| **ACC** | Amount of Cash Converted — 환전 현금 금액 |
+
+```
+운임 금액 구성 예시:
+
+  Base Fare (B)           ₩450,000  (세금 제외 순수 운임)
+  + Total Tax (TTX)        ₩78,400  (모든 세금 합계)
+    ├─ Airport Tax           ₩28,000
+    ├─ Security Tax           ₩9,800
+    ├─ Fuel Surcharge        ₩32,000
+    └─ PFC (702)              ₩8,600
+  ─────────────────────────────────
+  Total Fare (TFT)       ₩528,400  (세금 포함 최종 금액)
+
+  Equivalent Fare (E)     $340.00  (다른 통화로 환산한 경우)
+```
+
+### bankerRates — 환율 정보
+
+TST에 적용된 **통화 간 환율 정보**. Base Fare와 Equivalent Fare 사이의 환산에 사용된다.
+
+| 필드 | 설명 |
+|------|------|
+| `firstRateDetail.currencyIsoCode` | 원본 통화 코드 |
+| `firstRateDetail.amount` | 환율 값 |
+| `secondRateDetail.currencyIsoCode` | 대상 통화 코드 |
+| `secondRateDetail.amount` | 환율 값 |
+
+---
+
+## 6. 최종 발권 기한 (lastTktDate)
+
+### 구조
+
+운임의 **최종 발권 기한**을 담는 구조. 이 기한이 지나면 해당 운임으로 발권할 수 없다.
+
+| 필드 | 설명 |
+|------|------|
+| `businessSemantic` | 날짜의 의미 유형 (아래 코드셋) |
+| `dateTime.year` | 연도 |
+| `dateTime.month` | 월 |
+| `dateTime.day` | 일 |
+
+#### businessSemantic (날짜 의미 코드)
+
+| 코드 | 설명 |
+|------|------|
+| **A** | Not Valid After — 이 날짜 이후 사용 불가 |
+| **B** | Not Valid Before — 이 날짜 이전 사용 불가 |
+| **DAT** | Date override — 날짜 강제 지정 |
+| **DO** | Booking date override — 예약일 강제 변경 |
+| **LT** | Last Ticketing date — 최종 발권 기한 |
+
+```
+lastTktDate 해석 예시:
+
+  businessSemantic: LT
+  dateTime: 2024-03-15
+  → 2024년 3월 15일까지 발권해야 해당 운임 유효
+
+  businessSemantic: A
+  dateTime: 2024-12-31
+  → 2024년 12월 31일 이후 여행 불가
+```
+
+---
+
+## 7. 세금 정보 (taxInformation)
+
+### 구조
+
+운임에 부과되는 **세금 상세 내역**. fareList 내에서 최대 120회 반복되며, 각 세금 항목의 유형, 금액, 국가를 포함한다.
+
+```
+taxInformation (최대 120회 반복)
+├─ taxDetails
+│   ├─ taxQualifier: 세금 한정자 (7 = Tax)
+│   ├─ taxIdentifier: 세금 코드 (예: YQ, YR, US, GB 등)
+│   ├─ taxType: 세금 유형
+│   ├─ taxNature: 세금 성격
+│   ├─ taxExempt: 면세 여부
+│   └─ isoCountry: 부과 국가 코드 (ISO 2자리)
+└─ amountDetails
+    └─ fareDataMainInformation
+        ├─ fareDataQualifier: 금액 유형
+        ├─ fareAmount: 세금 금액
+        └─ fareCurrency: 통화
+```
+
+### Duty/Tax/Fee 유형 코드셋
+
+공항세, 출국세, 보안세 등 **세금의 종류**를 구분하는 코드.
+
+| 코드 | 설명 |
+|------|------|
+| **1** | Additional tax — 추가세 |
+| **2** | Airport tax — 공항세 |
+| **3** | Public Assistance tax — 공공 지원세 |
+| **4** | Security tax — 보안세 |
+| **5** | Departure tax — 출국세 |
+| **6** | Value Added Tax (VAT) — 부가가치세 |
+| **7** | Agriculture tax — 농업세 |
+| **8** | Immigration/Customs tax — 출입국/관세 |
+| **9** | Inspection fee — 검사 수수료 |
+| **10** | Embarkation tax — 탑승세 |
+| **11** | Infrastructure tax — 인프라세 |
+| **12** | Passenger Service Charge — 여객 서비스 요금 |
+| **13** | Government tax — 정부세 |
+| **14** | Fuel surcharge — 유류 할증료 |
+| **15** | Insurance surcharge — 보험 할증료 |
+| **16** | Miscellaneous fee — 기타 수수료 |
+| **17** | Noise surcharge — 소음 할증료 |
+| **18** | Passenger Facility Charge (PFC) — 공항 이용료 |
+| **19** | Animal/Quarantine tax — 동물/검역세 |
+| **20** | Terminal fee — 터미널 이용료 |
+| **21** | Tax on transport — 운송세 |
+| **22** | User Development Fee — 사용자 개발 수수료 |
+| **23** | War risk surcharge — 전쟁 위험 할증료 |
+| **24** | Exempt tax — 면제 세금 |
+
+### 주요 세금 식별자 (taxIdentifier)
+
+| 코드 | 설명 |
+|------|------|
+| **YQ** | Carrier surcharge — 항공사 유류 할증료 |
+| **YR** | Carrier surcharge (추가) — 항공사 추가 할증료 |
+| **US** | United States tax — 미국 세금 |
+| **GB** | United Kingdom tax — 영국 세금 |
+| **BP** | 출국세 (한국 등 특정 국가) |
+| **SW** | 보안세 |
+
+---
+
+## 8. 운임 구성요소 (fareComponentDetailsGroup)
+
+### 구조
+
+운임의 **구간별 세부 구성** 정보. Horizontal Fare Calculation(FCA)의 각 구성요소를 나타낸다. fareList 내에서 최대 99회 반복.
+
+```
+fareComponentDetailsGroup (최대 99회 반복)
+├─ fareComponentID: 구성요소 식별 번호
+│   └─ itemNumberDetails
+│       ├─ number: 구성요소 번호
+│       └─ type: 번호 유형
+├─ marketFareComponent: 시장 운임 구성요소
+│   ├─ boardPointDetails: 출발지
+│   │   └─ trueLocationId: 공항/도시 코드
+│   └─ offpointDetails: 도착지
+│       └─ trueLocationId: 공항/도시 코드
+├─ monetaryInformation: 구간 운임 금액
+│   └─ amountType / amount / currency
+├─ componentClassInfo: 구간 RBD/캐빈 정보
+│   └─ fareBasisDetails
+│       ├─ rateTariffClass: Fare Basis Code
+│       ├─ otherRateTariffClass: RBD
+│       └─ fareQualifier: 운임 한정자
+├─ fareQualifiersDetail: 운임 상세 한정자
+├─ fareFamilyDetails: Fare Family 정보
+│   ├─ fareFamilyname: Fare Family 이름
+│   └─ hierarchy: 계층 순서
+├─ fareFamilyOwner: Fare Family 소유 항공사
+├─ couponDetailsGroup: 쿠폰 상세 그룹
+│   ├─ productId: 항공편 식별
+│   │   ├─ flightNumber: 편명
+│   │   └─ operationalSuffix: 운항 접미사
+│   ├─ couponInformation: 쿠폰 정보
+│   │   ├─ couponStatus: 쿠폰 상태
+│   │   └─ couponNumber: 쿠폰 번호
+│   └─ yieldGroup: 수익(Yield) 정보
+│       └─ yieldInformationGroup
+│           ├─ origin: 출발지
+│           └─ destination: 도착지
+└─ ... (반복)
+```
+
+### Fare Basis Code
+
+운임의 **규칙과 조건을 코드화**한 문자열. 각 문자/숫자 조합이 운임의 성격을 나타낸다.
+
+```
+Fare Basis 예시: YOWKR
+
+  Y    → 캐빈 클래스 (Y = Economy)
+  OW   → 편도 (One Way)
+  K    → 예약 클래스 (Booking Class)
+  R    → 추가 한정자 (제한 조건 등)
+```
+
+### Fare Family 정보
+
+Fare Family는 항공사가 **부가서비스 포함 수준에 따라 운임을 등급화**한 것이다. fareComponentDetailsGroup 내에서 각 구간의 Fare Family 정보를 포함한다.
+
+| 필드 | 설명 |
+|------|------|
+| `fareFamilyDetails.fareFamilyname` | Fare Family 이름 (예: LIGHT, STANDARD, FLEX) |
+| `fareFamilyDetails.hierarchy` | 계층 순서 (높을수록 상위 등급) |
+| `fareFamilyOwner.companyIdentification.otherCompany` | Fare Family 소유 항공사 코드 |
+
+---
+
+## 9. OB Fee (feeBreakdown)
+
+### 구조
+
+OB Fee(추가 수수료)의 **상세 내역**. fareList 내에서 최대 99회 반복.
+
+```
+feeBreakdown (최대 99회 반복)
+├─ feeType: 수수료 유형
+│   └─ codedAttribute
+│       └─ attributeType: OB 또는 OC
+├─ feeDetails: 수수료 상세
+│   └─ selectionDetails
+│       ├─ option: 수수료 옵션
+│       └─ optionInformation: 수수료 상세 정보
+├─ feeInfo: 수수료 정보
+│   └─ dataTypeInformation
+│       ├─ subType: 하위 유형 코드 (FC1~FC6, FCA 등)
+│       └─ status: 상태
+├─ feeDescription: 수수료 설명 (자유 텍스트)
+│   └─ freeTextDetails / freeText
+├─ feeAmounts: 수수료 금액
+│   └─ monetaryDetails
+│       ├─ typeQualifier: 금액 유형
+│       ├─ amount: 금액
+│       └─ currency: 통화
+└─ feeTaxes: 수수료에 부과되는 세금
+    └─ taxDetails / amountDetails
+```
+
+### OB Fee 유형
+
+| 유형 | 설명 |
+|------|------|
+| **OB** | OB Fee — 에이전시 마크업/서비스 수수료 |
+| **OC** | OC Fee — 부가서비스 수수료 (좌석 선택, 수하물 추가 등) |
+
+### Fee Subcode (dataTypeInformation.subType)
+
+| 코드 | 설명 |
+|------|------|
+| **FC1** | Fee subcode 1 — 수수료 하위 코드 1 |
+| **FC2** | Fee subcode 2 — 수수료 하위 코드 2 |
+| **FC3** | Fee subcode 3 — 수수료 하위 코드 3 |
+| **FC4** | Fee subcode 4 — 수수료 하위 코드 4 |
+| **FC5** | Fee subcode 5 — 수수료 하위 코드 5 |
+| **FC6** | Fee subcode 6 — 수수료 하위 코드 6 |
+| **FCA** | Fare Calculation Amount — 운임 계산 금액 |
+| **R01–R20** | Reference 01~20 — 참조 코드 1~20 |
+| **T01–T20** | Tax 01~20 — 세금 코드 1~20 |
+
+---
+
+## 10. 자동 재발행 정보 (automaticReissueInfo)
+
+### 구조
+
+**재발행(Reissue) 시 자동 적용되는 정보**. 여정 변경 후 항공권을 재발행할 때 패널티, 잔액, 세금 재계산 등의 정보를 담는다.
+
+```
+automaticReissueInfo
+├─ ticketInfo: 원래 항공권 정보
+│   └─ ticketDetails
+│       ├─ number: 항공권 번호
+│       └─ type: 문서 유형
+├─ couponInfo: 쿠폰 정보 (최대 4회)
+│   └─ couponDetails
+│       ├─ cpnNumber: 쿠폰 번호
+│       ├─ cpnStatus: 쿠폰 상태
+│       └─ cpnAmount: 쿠폰 금액
+├─ reissuePenalty: 재발행 패널티
+│   └─ penDisInformation
+│       └─ discountPenaltyDetails
+│           ├─ rate: 패널티율 (%)
+│           └─ amount: 패널티 금액
+├─ reissueInfo: 재발행 상세 정보
+│   └─ issueInformation
+│       ├─ dateOfIssue: 원래 발행일
+│       └─ iataNumber: IATA 번호
+├─ oldTaxInfo: 원래 세금 정보 (최대 99회)
+│   └─ taxDetails / amountDetails
+├─ reissueBalanceInfo: 재발행 잔액 정보
+│   └─ monetaryDetails
+│       ├─ typeQualifier: 금액 유형
+│       ├─ amount: 잔액
+│       └─ currency: 통화
+└─ reissueAttributes: 재발행 속성
+    └─ attributeType: REVAL 또는 WAIV
+```
+
+### 재발행 속성 (attributeType)
+
+| 코드 | 설명 |
+|------|------|
+| **REVAL** | Revalidation — 재확인. 운임/여정의 유효성 재검증 |
+| **WAIV** | Waiver — 면제. 패널티 면제 적용 |
+
+---
+
+## 11. 승객/세그먼트/기타 참조 구조
+
+### paxSegReference — 승객/세그먼트 참조
+
+fareList가 **어떤 승객과 어떤 구간**에 해당하는지 연결하는 구조.
+
+| 필드 | 설명 |
+|------|------|
+| `referenceDetails.type` | 참조 유형 코드 |
+| `referenceDetails.value` | 참조 값 (번호) |
+
+#### Reference Qualifier (참조 유형 코드셋)
+
+| 코드 | 설명 |
+|------|------|
+| **P** | Passenger — 승객 참조 |
+| **PA** | Passenger Adult — 성인 승객 |
+| **PI** | Passenger Infant — 유아 승객 |
+| **S** | Segment — 세그먼트(구간) 참조 |
+| **T** | TST — TST 참조 |
+| **TST** | TST reference — TST 참조 (명시적) |
+
+### validatingCarrier — 발권 항공사
+
+운임에 대한 **발권 항공사** 정보. 발권 항공사는 항공권을 발행하고, BSP(Billing and Settlement Plan)를 통해 정산하는 주체이다.
+
+| 필드 | 설명 |
+|------|------|
+| `carrierInformation.companyIdentification.otherCompany` | 발권 항공사 코드 (IATA 2자리) |
+
+### passengerInformation — 승객 정보
+
+| 필드 | 설명 |
+|------|------|
+| `passengerReference.type` | 승객 유형 (PA=성인, PI=유아) |
+| `passengerReference.value` | 승객 참조 번호 |
+
+### originDestination — 출발지/도착지 정보
+
+fareList 내에서 최대 6회 반복. 운임이 적용되는 **출발지-도착지 쌍** 정보.
+
+| 필드 | 설명 |
+|------|------|
+| `origin` | 출발지 코드 |
+| `destination` | 도착지 코드 |
+
+### segmentInformation — 세그먼트 정보
+
+fareList 내에서 최대 96회 반복. 각 **항공편 구간의 상세 정보**.
+
+| 필드 | 설명 |
+|------|------|
+| `connexInformation.connecDetails.routingInformation` | 연결 유형 (O=비연결, X=환승 연결) |
+| `segDetails.segmentNumber` | 세그먼트 번호 |
+| `segDetails.segmentClass` | 예약 클래스 (RBD) |
+| `segDetails.segmentStatus` | 세그먼트 상태 |
+| `validityInformation` | 유효 기간 정보 |
+| `flightInformation.companyId` | 항공사 코드 |
+| `flightInformation.flightNumber` | 편명 |
+| `boardPointDetails.trueLocationId` | 출발 공항 |
+| `offpointDetails.trueLocationId` | 도착 공항 |
+
+#### 연결 유형 (Connection Type)
+
+| 코드 | 설명 |
+|------|------|
+| **O** | No connection — 비연결 (별도 구간) |
+| **X** | Point of connection — 환승 연결 지점 |
+
+#### 세그먼트 상태 (Ticketing Status)
+
+| 코드 | 설명 |
+|------|------|
+| **NO** | Closed/Canceled — 마감/취소 |
+| **OK** | Confirmed — 확정 |
+| **RQ** | Requested — 요청 중 |
+| **SP** | Space available — 좌석 대기 |
+
+---
+
+## 12. 수하물/캐빈/기타 정보
+
+### bagAllowanceInformation — 수하물 허용량
+
+운임에 포함된 **무료 수하물 허용량** 정보. 최대 99회 반복.
+
+| 필드 | 설명 |
+|------|------|
+| `bagAllowanceDetails.baggageType` | 수하물 유형 |
+| `bagAllowanceDetails.baggageQuantity` | 수하물 수량 (PC 기준) |
+| `bagAllowanceDetails.baggageWeight` | 수하물 무게 (KG 기준) |
+| `bagAllowanceDetails.measureUnit` | 측정 단위 |
+
+#### 측정 단위 (Measure Unit)
+
+| 코드 | 설명 |
+|------|------|
+| **K** | Kilogram — 킬로그램 |
+| **L** | Pound — 파운드 |
+| **PC** | Piece — 개수 |
+
+```
+수하물 허용 예시:
+
+  이코노미 (STANDARD):  1PC / 23K  (위탁 1개, 23kg)
+  이코노미 (FLEX):      2PC / 23K  (위탁 2개, 각 23kg)
+  비즈니스:             2PC / 32K  (위탁 2개, 각 32kg)
+```
+
+### cabinGroup — 캐빈 정보 그룹
+
+운임에 적용되는 **캐빈 클래스 정보**. 최대 99회 반복.
+
+| 필드 | 설명 |
+|------|------|
+| `cabinProduct.cabin` | 캐빈 코드 |
+| `cabinProduct.rbd` | RBD (예약 클래스) |
+
+#### Cabin Class 코드
+
+| 코드 | 설명 |
+|------|------|
+| **F** | First Class — 일등석 |
+| **C** | Business Class — 비즈니스석 |
+| **W** | Premium Economy — 프리미엄 이코노미 |
+| **Y** | Economy Class — 이코노미석 |
+
+### fareQualifier — 운임 한정자
+
+운임의 **추가 속성과 분류** 정보.
+
+| 필드 | 설명 |
+|------|------|
+| `fareQualifierDetails.fareQualifier` | 운임 한정자 코드 |
+| `fareQualifierDetails.movementType` | 여정 유형 |
+
+#### fareQualifier 주요 코드 (700번대)
+
+| 코드 | 설명 |
+|------|------|
+| **700** | Published/IATA fare — 공시/IATA 운임 |
+| **701** | Unifare — 통합 운임 |
+| **702** | PFC — Passenger Facility Charge |
+| **703** | Negotiated fare — 협상 운임 |
+| **711** | Corporate fare — 기업 계약 운임 |
+| **712** | Private fare — 사설 운임 |
+| **720** | Bulk fare — 대량 판매 운임 |
+| **730** | Tour fare — 여행 상품 운임 |
+| **749** | Cat35 fare — Category 35 협상 운임 |
+| **766** | Award/Mileage fare — 마일리지 운임 |
+| **797** | Instant Purchase fare — 즉시 구매 운임 |
+
+#### movementType (여정 유형)
+
+| 코드 | 설명 |
+|------|------|
+| **OW** | One Way — 편도 |
+| **RT** | Round Trip — 왕복 |
+| **CT** | Circle Trip — 순환 여정 |
+| **OJ** | Open Jaw — 오픈죠 |
+
+### corporateInfo — 기업 운임 정보
+
+**기업 계약 운임** 관련 정보.
+
+| 필드 | 설명 |
+|------|------|
+| `fareQualifier` | 운임 한정자 (Corporate 등) |
+| `corporateID` | 기업 계약 코드 |
+
+### mileage — 마일리지 정보
+
+운임에 적용된 **마일리지 계산** 정보.
+
+| 필드 | 설명 |
+|------|------|
+| `mileageDetails.totalMileage` | 총 마일리지 |
+| `mileageDetails.maxAllowedMileage` | 최대 허용 마일리지 (MPM) |
+| `mileageDetails.excessMileage` | 초과 마일리지 (EMS) |
+
+### warningInformation — 경고 메시지
+
+운임 계산 과정에서 발생한 **경고 및 참고 메시지**. 최대 99회 반복.
+
+| 필드 | 설명 |
+|------|------|
+| `warningCode` | 경고 코드 |
+| `warningText` | 경고 메시지 내용 |
+
+### otherPricingInfo — 기타 가격 정보
+
+추가적인 **가격 관련 코딩 정보**. 최대 99회 반복.
+
+| 필드 | 설명 |
+|------|------|
+| `attributeDetails.attributeType` | 속성 유형 |
+| `attributeDetails.attributeDescription` | 속성 설명/값 |
+
+### offerReferences — Offer 참조
+
+NDC Offer와의 **연결 참조 정보**.
+
+| 필드 | 설명 |
+|------|------|
+| `offerIdentifier` | Offer 식별자 |
+| `offerItemIdentifier` | Offer Item 식별자 |
+
+---
+
+## 13. 결제 수단 (Form of Payment)
+
+운임 계산 시 지정할 수 있는 **결제 수단 유형** 코드셋.
+
+| 코드 | 설명 |
+|------|------|
+| **AGT** | Agency — 에이전시 결제 |
+| **CA** | Cash — 현금 |
+| **CC** | Credit Card — 신용카드 |
+| **CK** | Check — 수표 |
+| **GR** | Government Receipt — 정부 영수증 |
+| **MS** | Miscellaneous — 기타 |
+| **NR** | Non-Refundable — 환불 불가 (운임 유형 지정) |
+| **PT** | Prepaid Ticket Advice (PTA) — 선불 항공권 |
+
+---
+
+## 14. 주요 코드셋 종합
+
+### Allowance/Charge Qualifier (허용/요금 한정자)
+
+수하물 허용량이나 초과 수하물 요금 등의 **유형 구분** 코드.
+
+### Application Error (오류 코드)
+
+오류 발생 시 반환되는 **오류 코드와 메시지**. applicationError 구조에서 사용.
+
+| 필드 | 설명 |
+|------|------|
+| `errorCode` | 오류 코드 |
+| `errorCategory` | 오류 분류 (EC = Error Code) |
+| `errorCodeOwner` | 오류 코드 소유자 (1A = Amadeus) |
+
+### Price Type Qualifier (가격 유형 한정자)
+
+| 코드 | 설명 |
+|------|------|
+| **IT** | Inclusive Tour — 포괄 여행 운임 |
+| **BT** | Bulk Fare — 대량 판매 운임 |
+
+### Processing Indicator (처리 지표)
+
+운임 처리 과정에서의 **특수 지시 코드**.
+
+### Location Function Code Qualifier (위치 기능 코드 한정자)
+
+| 코드 | 설명 |
+|------|------|
+| **A** | Airport — 공항 |
+| **C** | City — 도시 |
+
+### Sequence Number (연결 유형 시퀀스)
+
+세그먼트 간 **연결 관계**를 나타내는 시퀀스 코드. 운임 계산 시 환승 여부 판단에 사용.
+
+---
+
+## 15. 메시지 구조 용어
+
+Fare_PricePNRWithBookingClass 기술 문서에서 사용되는 **메시지 구조 정의 용어**.
+
+| 용어 | 설명 |
+|------|------|
+| **Entity** | 메시지 내 데이터 항목의 참조 이름 |
+| **Structure** | Entity의 정식 명칭과 참조 번호 |
+| **Rep (Repetitions)** | 상위 구조 내에서의 반복 횟수 |
+| **St (Status)** | 필수 여부. M=Mandatory, C=Conditional, M*=구현 시 필수 |
+| **Fmt (Format)** | 데이터 형식. a=문자, n=숫자, an=영숫자, ..x=가변 길이 |
+| **Grouped Structure** | 하위 구조를 포함하는 복합 구조 (계층 구조) |
+| **Simple Structure** | 데이터 요소만 포함하는 단순 구조 |
+| **Codeset** | 코드화된 데이터 항목의 가능한 값 목록 |
+
+### 데이터 형식 표기법
+
+| 표기 | 의미 | 예시 |
+|------|------|------|
+| `a2` | 고정 2자리 문자 | `KE` (항공사 코드) |
+| `a3` | 고정 3자리 문자 | `ICN` (공항 코드) |
+| `n6` | 고정 6자리 숫자 | `150326` (날짜) |
+| `an..35` | 가변 영숫자 최대 35자리 | `HONG/GILDONG MR` |
+| `n..18` | 가변 숫자 최대 18자리 | `528400` (금액) |
+| `an..3` | 가변 영숫자 최대 3자리 | `ADT` (승객 유형) |
+
+### Grouped Structure 목록
+
+| 구조 | 설명 |
+|------|------|
+| **COUPONDETAILSTYPE** | 쿠폰 상세 — 항공권 쿠폰의 상태/금액 정보 |
+| **FARECOMPONENTDETAILSTYPE** | 운임 구성요소 상세 — FCA 각 구간의 운임 분해 |
+| **ERRORGROUPTYPE** | 오류 그룹 — 오류 코드 + 오류 텍스트 묶음 |
+| **OFFERREFERENCESTYPE** | Offer 참조 — NDC Offer/OfferItem 연결 정보 |
+
+### Simple Structure 목록 (주요)
+
+| 구조 | 설명 |
+|------|------|
+| **RESERVATION CONTROL INFORMATION** | PNR 레코드 로케이터 (6자리) |
+| **PRICING/TICKETING SUBSEQUENT** | TST 유형/판매 지표 등 가격 후속 정보 |
+| **ITEM REFERENCES AND VERSIONS** | 항목 참조 번호 및 버전 |
+| **FARE INFORMATION** | 운임 금액 정보 (fareDataQualifier 포함) |
+| **STRUCTURED DATE TIME INFORMATION** | 구조화된 날짜/시간 (lastTktDate 등) |
+| **TRANSPORT IDENTIFIER** | 항공편 식별 (편명, 운항사) |
+| **REFERENCE INFORMATION** | 참조 정보 (승객, 세그먼트, TST 참조) |
+| **MONETARY INFORMATION** | 금액 정보 (통화, 금액, 유형) |
+| **DUTY/TAX/FEE DETAILS** | 세금 상세 (세금 유형, 금액, 국가) |
+| **DISCOUNT AND PENALTY INFORMATION** | 할인/패널티 (할인율, 패널티 금액) |
+| **ORIGIN AND DESTINATION DETAILS** | 출발지/도착지 상세 |
+| **CONNECTION DETAILS** | 연결 정보 (환승 여부) |
+| **TRAVEL PRODUCT INFORMATION** | 여행 상품 정보 (출발지/도착지/항공사) |
+| **FARE QUALIFIER DETAILS** | 운임 한정자 상세 |
+| **PRODUCT INFORMATION** | 상품 정보 (캐빈, RBD) |
+| **EXCESS BAGGAGE DETAILS** | 초과 수하물 상세 |
+| **CODED ATTRIBUTE** | 코딩된 속성 (OB/OC Fee 유형 등) |
+| **APPLICATION ERROR INFORMATION** | 오류 정보 |
+| **TICKET NUMBER DETAILS** | 항공권 번호 상세 |
+| **COUPON INFORMATION** | 쿠폰 정보 (상태, 번호) |
+| **CORPORATE FARE INFORMATION** | 기업 운임 정보 |
+| **SELECTION DETAILS** | 선택 상세 (Fee 옵션 등) |
+| **SPECIFIC DATA INFORMATION** | 특정 데이터 정보 (Fee subcode 등) |
+| **TAX DETAILS** | 세금 상세 |
+| **ADDITIONAL PRODUCT DETAILS** | 추가 상품 상세 |
+| **DUMMY SEGMENT** | 더미 세그먼트 (fareList 종료 마커) |
+| **CODED PRICING OPTION KEY** | 코딩된 가격 옵션 키 (pricingOptionKey) |
+| **ATTRIBUTE** | 속성 (REVAL, WAIV 등) |
+| **CURRENCIES** | 통화 정보 |
+| **FARE FAMILY** | Fare Family 정보 |
+| **FREE TEXT INFORMATION** | 자유 텍스트 정보 |
+| **OFFER** | Offer 정보 (NDC) |
+
+---
+
+## 약어 모음
+
+| 약어 | 정식 명칭 | 설명 |
+|------|----------|------|
+| **TST** | Transitional Stored Ticket | PNR에 저장되는 임시 운임 레코드. 발권 전 최종 운임 확정 |
+| **PNR** | Passenger Name Record | 승객 예약 기록 |
+| **FCA** | Fare Calculation / Horizontal Fare Calculation | 구간별 운임 분해 계산 (수평 운임 계산) |
+| **FCMI** | Fare Calculation Mode Indicator | 운임 계산 모드 지표 |
+| **RBD** | Reservation Booking Designator | 예약 클래스 (Y, M, H 등) |
+| **PTC** | Passenger Type Code | 승객 유형 코드 (ADT, CHD, INF 등) |
+| **FOP** | Form of Payment | 결제 수단 |
+| **BSP** | Billing and Settlement Plan | 항공권 정산 시스템 |
+| **OB Fee** | Optional Booking Fee | 에이전시 추가 수수료 |
+| **OC Fee** | Optional Charge Fee | 부가서비스 수수료 |
+| **PFC** | Passenger Facility Charge | 공항 이용료 |
+| **MPM** | Maximum Permitted Mileage | 최대 허용 마일리지 |
+| **EMS** | Excess Mileage Surcharge | 초과 마일리지 할증료 |
+| **EMD** | Electronic Miscellaneous Document | 전자 기타 문서 (부가서비스 전표) |
+| **NDC** | New Distribution Capability | 항공사 직접 연결 유통 표준 |
+| **IATA** | International Air Transport Association | 국제항공운송협회 |
+| **ATAF** | African Airlines Association | 아프리카 항공 협회 |
+| **GRI** | Global Route Indicator | 글로벌 경로 지표 |
+| **EDIFACT** | Electronic Data Interchange For Administration, Commerce and Transport | 전자 데이터 교환 표준 |
+| **TPCBRQ** | (EDIFACT message name for Query) | 운임 계산 요청 메시지명 |
+| **TPCBRR** | (EDIFACT message name for Reply) | 운임 계산 응답 메시지명 |
+| **FXP** | (Cryptic command) | Fare_PricePNRWithBookingClass의 Cryptic 명령어 |
+| **YQ** | Carrier Surcharge | 항공사 유류 할증료 |
+| **YR** | Carrier Surcharge (additional) | 항공사 추가 할증료 |
+| **VAT** | Value Added Tax | 부가가치세 |
+| **PTA** | Prepaid Ticket Advice | 선불 항공권 |
+| **LSA** | Last Seat Available | 마지막 좌석 가용 여부 |
+
+---
+
 ## 참고
 
 - [WBS Integration Flow - Step 10](amadeus-wbs-integration-flow.md)
 - [PNR_Retrieve 용어집](pnr-retrieve.md)
+- [FOP_CreateFormOfPayment 용어집](fop-create-form-of-payment.md)
+- [Master Pricer Travelboard Search 용어집](master-pricer-travelboard-search.md)
