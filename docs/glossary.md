@@ -9,11 +9,14 @@
 **Air_FlightInfo**
 :   Amadeus API. 항공편 번호·날짜 기반으로 스케줄, 기재, 좌석 현황, 기내 서비스 등 상세 운항 정보를 조회. → [Air FlightInfo](air-flightinfo.md#1-개요)
 
+**Air_SellFromRecommendation**
+:   Amadeus API. MPTBS 검색 결과(Recommendation)를 기반으로 실제 항공편 예약(Booking)을 생성. → [Air SellFromRecommendation](air-sell-from-recommendation.md)
+
 **ASC** (Advice of Schedule Change)
 :   항공편 스케줄 변경 통보. GDS를 통해 여행사에 자동 전달. → [Air FlightInfo](air-flightinfo.md#7-메시지-기능-코드-주요)
 
 **ATPCO** (Airline Tariff Publishing Company)
-:   항공 운임 데이터를 관리·배포하는 기관. Fare Rule, 수하물 규정, Amenity 데이터 등 제공. → [MPTBS](master-pricer-travelboard-search.md#약어-모음)
+:   항공 운임 데이터를 관리·배포하는 기관. Fare Rule, 수하물 규정, Amenity 데이터 등 제공. → [MPTBS](master-pricer-travelboard-search.md#약어-모음), [Fare GetFareRules](fare-get-fare-rules.md)
 
 **ACM** (Agent Credit Memo)
 :   항공사가 여행사에 환급하는 문서. BSP 정산에서 차감 처리. → [BSP 정산 가이드](bsp-settlement-guide.md#4-핵심-문서전표)
@@ -77,10 +80,11 @@
 **EOS** (Extended Office Setup)
 :   Amadeus에서 OID 간 연결/접근 권한 설정. Sabre의 Branch에 대응. → [Amadeus 용어](gds-terminology.md#4-amadeus-용어)
 
+**EOT** (End of Transaction)
+:   PNR 저장 완료 명령. PNR_AddMultiElements에서 옵션 코드 `ET`로 지정. → [PNR AddMultiElements](pnr-add-multi-elements.md)
+
 **EPR** (Electronic Point of Reference)
 :   Sabre API 접속 시 사용하는 엔드포인트 식별자. → [Sabre Credential](gds-terminology.md#3-sabre-용어)
-
-## E
 
 **Equipment Type** (기재 유형)
 :   항공기 기종을 나타내는 IATA 3자리 코드. 예: 388=A380, 789=B787-9, 77W=B777-300ER. → [MPTBS](master-pricer-travelboard-search.md#10-기타-주요-용어)
@@ -93,6 +97,9 @@
 **Flight Indicator** (항공편 유형 지시자)
 :   항공편의 서비스 유형을 나타내는 코드. D=직항, N=무기착, A=코드셰어, F=전세기 등. → [Air FlightInfo](air-flightinfo.md#flight-indicator-코드)
 
+**Fare_GetFareRules**
+:   Amadeus API. ATPCO Rule Category별 운임 규정(변경/환불 조건, 최소체류기간 등)을 조회. → [Fare GetFareRules](fare-get-fare-rules.md)
+
 **Fare Basis Code**
 :   항공 운임의 규정을 나타내는 코드. 예: YOWKR, HLE3M. → [운임 구조](bsp-settlement-guide.md#10-운임-구조-fare-structure)
 
@@ -100,12 +107,15 @@
 :   항공사가 부가서비스 포함 여부에 따라 운임을 등급화한 상품 체계. 예: LIGHT, STANDARD, FLEX. → [MPTBS](master-pricer-travelboard-search.md#5-fare-family-브랜드-운임)
 
 **FOP** (Form of Payment)
-:   결제 수단. 현금, 신용카드, 마일리지 등 항공권 결제에 사용되는 지불 방식. → [MPTBS](master-pricer-travelboard-search.md#약어-모음)
+:   결제 수단. 현금, 신용카드, 마일리지 등 항공권 결제에 사용되는 지불 방식. → [MPTBS](master-pricer-travelboard-search.md#약어-모음), [PNR AddMultiElements](pnr-add-multi-elements.md)
 
 ## G
 
 **GDS** (Global Distribution System)
 :   항공·호텔·렌터카 등 여행 상품을 예약하는 글로벌 유통 시스템. Amadeus, Sabre, Travelport 등. → [공통 기본 용어](gds-terminology.md#1-공통-기본-용어)
+
+**Global Direction** (글로벌 방향)
+:   운임 적용 방향. AT=대서양, PA=태평양, EH=동반구, WH=서반구 등. → [Fare GetFareRules](fare-get-fare-rules.md)
 
 **GOL** (Global Online License)
 :   온라인 여행사 전용 IATA 인증. → [규제 및 인증](bsp-settlement-guide.md#19-규제-및-인증)
@@ -191,7 +201,16 @@
 :   Amadeus 시스템의 운영 환경 모드. Sabre의 Cert Mode에 대응. → [Amadeus 용어](gds-terminology.md#4-amadeus-용어)
 
 **PNR** (Passenger Name Record)
-:   항공 예약 기록의 기본 데이터 단위. 승객 정보, 여정, 연락처, 발권 정보 포함. → [공통 기본 용어](gds-terminology.md#1-공통-기본-용어)
+:   항공 예약 기록의 기본 데이터 단위. 승객 정보, 여정, 연락처, 발권 정보 포함. → [공통 기본 용어](gds-terminology.md#1-공통-기본-용어), [PNR AddMultiElements](pnr-add-multi-elements.md), [PNR Retrieve](pnr-retrieve.md)
+
+**PNR_AddMultiElements**
+:   Amadeus API. PNR에 승객 이름, 여정, SSR, OSI, 발권 정보, Remarks 등 다양한 요소를 추가·수정. → [PNR AddMultiElements](pnr-add-multi-elements.md)
+
+**PNR_Retrieve**
+:   Amadeus API. 예약 번호(Record Locator) 기반으로 PNR 전체 또는 특정 요소를 조회. → [PNR Retrieve](pnr-retrieve.md)
+
+**Purge Date** (삭제 예정일)
+:   PNR이 GDS에서 자동 삭제되는 날짜. 일반적으로 최종 구간 출발 후 일정 기간 경과 시. → [PNR Retrieve](pnr-retrieve.md)
 
 **PTC** (Passenger Type Code)
 :   승객 유형 코드. ADT=성인, CHD=소아, INF=유아. 운임 산정 기준. → [MPTBS](master-pricer-travelboard-search.md#ptc-passenger-type-code)
@@ -212,6 +231,9 @@
 
 ## R
 
+**Record Locator** (예약 번호)
+:   PNR을 식별하는 6자리 영숫자 코드. Amadeus에서는 RL, Sabre에서는 Confirmation Number라고도 함. → [PNR Retrieve](pnr-retrieve.md)
+
 **Recommendation**
 :   MPTBS 검색 결과의 단위. 하나의 여정 조합 + 운임 정보를 포함. → [MPTBS](master-pricer-travelboard-search.md#recommendation)
 
@@ -220,6 +242,9 @@
 
 **RD** (Remittance Date)
 :   실제 대금 납부일. → [BSP 동작 흐름](bsp-settlement-guide.md#2-bsp-동작-흐름)
+
+**Rule Category** (운임 규정 카테고리)
+:   ATPCO가 정의한 운임 규정 분류. Cat 5=사전구매, Cat 6=최소체류, Cat 16=벌금, Cat 31=자발적 변경, Cat 33=자발적 환불. → [Fare GetFareRules](fare-get-fare-rules.md)
 
 **RFIC** (Reason For Issuance Code)
 :   EMD 발급 사유를 나타내는 코드. A=Air Transportation, C=Baggage 등. → [MPTBS](master-pricer-travelboard-search.md#rfic-reason-for-issuance-code)
@@ -231,6 +256,9 @@
 :   BSP 정산 주기. → [BSP 동작 흐름](bsp-settlement-guide.md#2-bsp-동작-흐름)
 
 ## S
+
+**Segment Status** (구간 상태 코드)
+:   항공편 구간의 예약 상태. HK=확약, NN=요청중, UC=좌석불가, WL=대기. → [Air SellFromRecommendation](air-sell-from-recommendation.md), [PNR AddMultiElements](pnr-add-multi-elements.md)
 
 **SSIM** (Standard Schedules Information Manual)
 :   IATA 표준 스케줄 정보 매뉴얼. 항공편 스케줄 데이터의 국제 표준 형식. → [Air FlightInfo](air-flightinfo.md#8-약어-모음)
@@ -246,13 +274,17 @@
 
 ## T
 
+**Tattoo** (타투)
+:   PNR 내 각 요소(구간, SSR 등)에 부여되는 고유 식별 번호. 요소 참조 시 사용. → [PNR Retrieve](pnr-retrieve.md)
+
 **TIDS** (Travel Industry Designator Service)
 :   비IATA 여행사 등록 서비스. → [규제 및 인증](bsp-settlement-guide.md#19-규제-및-인증)
 
 **TKT** (Ticket)
 :   발권된 항공권. BSP를 통해 정산. → [핵심 문서/전표](bsp-settlement-guide.md#4-핵심-문서전표)
 
-## T
+**TST** (Transitional Stored Ticket)
+:   Amadeus에서 운임 계산 결과를 PNR에 저장하는 레코드. 발권 전 운임 정보 보관. → [PNR Retrieve](pnr-retrieve.md)
 
 **Tech Stop** (기술 착륙)
 :   여객 탑승/하차 없이 연료 보급 등 목적으로 경유하는 공항. → [MPTBS](master-pricer-travelboard-search.md#10-기타-주요-용어)

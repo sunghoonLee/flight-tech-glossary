@@ -19,6 +19,10 @@ https://sunghoonlee.github.io/flight-tech-glossary/
 |---------|------|------------|
 | Master Pricer Travelboard Search | 항공편 검색 + 최저가 운임 조회 API | MPTBS, Recommendation, Fare Family, Mini Rules |
 | Air FlightInfo | 항공편 정보 조회 API | FLIFO, Marriage Segment, Equipment, Meal Service |
+| Air SellFromRecommendation | 검색 결과 기반 예약 생성 API | Segment Status, Marriage, Itinerary |
+| Fare GetFareRules | 운임 규정 조회 API | ATPCO Rule Category, Fare Basis, Global Direction |
+| PNR AddMultiElements | PNR 요소 추가/수정 API | SSR, OSI, FOP, Ticketing, Remarks |
+| PNR Retrieve | PNR 조회 API | Record Locator, TST, DCS, History |
 
 ### 색인
 
@@ -39,6 +43,10 @@ docs/
 ├── bsp-settlement-guide.md             # [공통] BSP 정산 가이드
 ├── master-pricer-travelboard-search.md # [Amadeus] MPTBS 용어
 ├── air-flightinfo.md                   # [Amadeus] Air FlightInfo 용어
+├── air-sell-from-recommendation.md     # [Amadeus] Air SellFromRecommendation 용어
+├── fare-get-fare-rules.md              # [Amadeus] Fare GetFareRules 용어
+├── pnr-add-multi-elements.md           # [Amadeus] PNR AddMultiElements 용어
+├── pnr-retrieve.md                     # [Amadeus] PNR Retrieve 용어
 ├── glossary.md                         # 용어 색인
 └── (새 문서).md                         # 새 카테고리 추가
 ```

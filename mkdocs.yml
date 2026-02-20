@@ -63,6 +63,10 @@ nav:
   - Amadeus:
     - Master Pricer Travelboard Search: master-pricer-travelboard-search.md
     - Air FlightInfo: air-flightinfo.md
+    - Air SellFromRecommendation: air-sell-from-recommendation.md
+    - Fare GetFareRules: fare-get-fare-rules.md
+    - PNR AddMultiElements: pnr-add-multi-elements.md
+    - PNR Retrieve: pnr-retrieve.md
   - 용어 색인: glossary.md
 
 extra:
