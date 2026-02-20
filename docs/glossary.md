@@ -6,6 +6,12 @@
 
 ## A
 
+**Air_FlightInfo**
+:   Amadeus API. 항공편 번호·날짜 기반으로 스케줄, 기재, 좌석 현황, 기내 서비스 등 상세 운항 정보를 조회. → [Air FlightInfo](air-flightinfo.md#1-개요)
+
+**ASC** (Advice of Schedule Change)
+:   항공편 스케줄 변경 통보. GDS를 통해 여행사에 자동 전달. → [Air FlightInfo](air-flightinfo.md#7-메시지-기능-코드-주요)
+
 **ATPCO** (Airline Tariff Publishing Company)
 :   항공 운임 데이터를 관리·배포하는 기관. Fare Rule, 수하물 규정, Amenity 데이터 등 제공. → [MPTBS](master-pricer-travelboard-search.md#약어-모음)
 
@@ -43,6 +49,9 @@
 **Client-ID**
 :   Sabre API 클라이언트 식별자. OAuth 인증 시 사용. → [Sabre Credential](gds-terminology.md#3-sabre-용어)
 
+**Cabin Class** (캐빈 등급)
+:   항공기 객실 등급. F=First, J/C=Business, W=Premium Economy, Y=Economy. → [Air FlightInfo](air-flightinfo.md#4-4-equipment-information-기재-정보)
+
 **Codeshare** (공동운항)
 :   하나의 항공편에 여러 항공사 편명이 붙는 것. → [Codeshare & Interline](bsp-settlement-guide.md#17-codeshare--interline)
 
@@ -50,6 +59,9 @@
 :   항공권 내 개별 구간. 하나의 항공권에 최대 4개. → [항공권 번호 체계](bsp-settlement-guide.md#8-항공권-번호-체계)
 
 ## D
+
+**Days of Operation** (운항 요일)
+:   항공편이 운항하는 요일을 7자리 문자열로 표현. 각 자리가 월~일 (예: `1234567`=매일). → [Air FlightInfo](air-flightinfo.md#4-2-additional-product-details-부가-상품-정보)
 
 **Date Variation** (날짜 차이)
 :   출발일 대비 도착일의 차이. 야간 비행·시차로 도착일이 다를 때 사용 (0=당일, 1=+1일). → [MPTBS](master-pricer-travelboard-search.md#10-기타-주요-용어)
@@ -74,6 +86,12 @@
 :   항공기 기종을 나타내는 IATA 3자리 코드. 예: 388=A380, 789=B787-9, 77W=B777-300ER. → [MPTBS](master-pricer-travelboard-search.md#10-기타-주요-용어)
 
 ## F
+
+**FLIFO** (Flight Information)
+:   항공편의 실시간 운항 정보. 게이트 변경, 지연/결항, 실제 출발/도착 시간 등 제공. → [Air FlightInfo](air-flightinfo.md#6-flifo-flight-information)
+
+**Flight Indicator** (항공편 유형 지시자)
+:   항공편의 서비스 유형을 나타내는 코드. D=직항, N=무기착, A=코드셰어, F=전세기 등. → [Air FlightInfo](air-flightinfo.md#flight-indicator-코드)
 
 **Fare Basis Code**
 :   항공 운임의 규정을 나타내는 코드. 예: YOWKR, HLE3M. → [운임 구조](bsp-settlement-guide.md#10-운임-구조-fare-structure)
@@ -105,6 +123,9 @@
 **IATA** (International Air Transport Association)
 :   국제항공운송협회. BSP 운영 기관. → [BSP 구성 요소](bsp-settlement-guide.md#3-bsp-주요-구성-요소)
 
+**ICAO** (International Civil Aviation Organization)
+:   국제민간항공기구. 항공 안전·보안 국제 표준 수립. → [Air FlightInfo](air-flightinfo.md#8-약어-모음)
+
 **Interline** (타항공사 연결)
 :   서로 다른 항공사 구간을 하나의 항공권으로 발권. → [Codeshare & Interline](bsp-settlement-guide.md#17-codeshare--interline)
 
@@ -117,6 +138,9 @@
 :   마지막 남은 좌석에서도 해당 운임으로 예약 가능한지 여부. → [MPTBS](master-pricer-travelboard-search.md#10-기타-주요-용어)
 
 ## M
+
+**Marriage Segment** (결합 구간)
+:   GDS에서 여러 구간이 하나의 여정으로 결합된 상태. 개별 취소/변경 불가, 전체를 함께 처리해야 함. → [Air FlightInfo](air-flightinfo.md#4-5-marriage-control-결합-구간)
 
 **Marketing Carrier** (마케팅 항공사)
 :   항공권을 판매하는 항공사. 편명을 소유. 코드셰어에서 Operating Carrier와 다를 수 있다. → [MPTBS](master-pricer-travelboard-search.md#marketing-carrier-vs-operating-carrier)
@@ -207,6 +231,9 @@
 :   BSP 정산 주기. → [BSP 동작 흐름](bsp-settlement-guide.md#2-bsp-동작-흐름)
 
 ## S
+
+**SSIM** (Standard Schedules Information Manual)
+:   IATA 표준 스케줄 정보 매뉴얼. 항공편 스케줄 데이터의 국제 표준 형식. → [Air FlightInfo](air-flightinfo.md#8-약어-모음)
 
 **Sellconnect**
 :   Amadeus의 데스크톱 예약 도구 연결 설정. Sabre의 SR360에 대응. → [Amadeus 용어](gds-terminology.md#4-amadeus-용어)
