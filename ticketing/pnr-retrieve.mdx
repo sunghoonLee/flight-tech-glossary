@@ -1,0 +1,650 @@
+---
+title: "PNR_Retrieve (PNR 조회)"
+description: "Amadeus PNRRetrieve API(버전 21.1)의 기술 용어를 정리한 문서입니다. 예약 번호(Record Locator) 또는 기타 조건을 기반으로 PNR의 전체 내용을 조회하는 API입니다."
+sidebarTitle: "PNR_Retrieve"
+---
+
+Amadeus `PNR_Retrieve` API(버전 21.1)의 기술 용어를 정리한 문서입니다. 예약 번호(Record Locator) 또는 기타 조건을 기반으로 PNR의 전체 내용을 조회하는 API입니다.
+
+---
+
+<Info title="WBS Integration Flow Step 11-12">
+이 API는 [WBS Integration Flow](/amadeus-wbs-integration-flow)의 **발권 단계 Step 11 (발권 전 최종 확인)** 및 **Step 12 (발권 후 항공권 번호 확인)**에 해당합니다.
+</Info>
+---
+
+## 1. 개요
+
+**PNR_Retrieve**는 Amadeus GDS에 저장된 PNR(Passenger Name Record)을 조회하는 핵심 API입니다.
+
+- **Query**: 조회 유형(Record Locator, 이름+오피스, FF번호 등)과 검색 조건을 지정
+- **Reply**: PNR의 전체 이미지(승객, 여정, SSR, 발권, Remarks 등)를 반환
+
+| 항목 | 내용 |
+|------|------|
+| API 명 | `PNR_Retrieve` |
+| 플로우 단계 | Step 11 -- 발권 전 확인, Step 12 -- 발권 후 확인 |
+| 목적 | PNR 전체 이미지 조회 (발권 전 검증 / 발권 후 항공권 번호 확인) |
+| 이전 단계 | [Fare_PricePNRWithBookingClass](/ticketing/fare-price-pnr-with-booking-class) |
+| 다음 단계 | [SalesReports_DisplayQueryReport](/post-issuance/sales-reports) |
+
+<Info title="용도">
+PNR 생성(`PNR_AddMultiElements`) 이후 PNR 내용 확인, 발권 전 검증, 예약 변경 전 현황 파악, 체크인 연동 등에 활용됩니다. Reply는 SBR(Single Booking Record) 전체 이미지를 담습니다.
+</Info>
+---
+
+## 2. Query 구조 (요청)
+
+### 최상위 구조
+
+| 엔티티 | 구조 | St | 설명 |
+|--------|------|----|------|
+| `settings` | Group | C | PNR 옵션 및 프린터 식별 정보 |
+| `settings/options` | Optional pnr actions | M | 반환 요소 선택 옵션 (현재는 미사용) |
+| `settings/printer` | Printer identification | C | 하드카피 요청 시 프린터 식별자 |
+| `retrievalFacts` | Group | M | PNR 조회에 필요한 정보 집합 |
+| `retrievalFacts/retrieve` | Retrieve pnr | M | 조회 유형, 옵션, 참조 정보 |
+| `retrievalFacts/reservationOrProfileIdentifier` | Reservation control information | C | Record Locator 또는 고객 프로파일로 조회 시 사용 |
+| `retrievalFacts/personalFacts` | Group | C | 승객 관련 조회 조건 |
+| `retrievalFacts/personalFacts/travellerInformation` | Traveller information | M | 이름+오피스 또는 이름+서비스로 조회 시 사용 |
+| `retrievalFacts/personalFacts/productInformation` | Travel product information | C | 여행 상품 정보 |
+| `retrievalFacts/ticket` | Ticket number | C | Record Locator 조회 시 선택적으로 사용하는 티켓 번호 |
+| `retrievalFacts/frequentFlyer` | Frequent traveller information | C | FF 번호로 조회 시 사용 |
+| `retrievalFacts/accounting` | Accounting information element | C | 계좌 번호로 조회 시 사용 |
+
+### retrieve (조회 유형)
+
+`retrieve` 구조의 핵심 필드입니다.
+
+| 필드 | 설명 |
+|------|------|
+| `type` | 조회 유형 코드. → [Retrieval type 코드](#retrieval-type-코드) 참조 |
+| `targetSystem` | 대상 시스템 식별자 (예: `1A` = Amadeus) |
+| `optionCode` | 조회 옵션 코드 |
+
+---
+
+## 3. Reply 구조 (응답)
+
+### 최상위 구조
+
+| 엔티티 | 구조 | St | Rep | 설명 |
+|--------|------|----|-----|------|
+| `generalErrorInfo` | Group | C | 99 | 일반 오류 정보 |
+| `pnrHeader` | Group | C | 198 | PNR 헤더 정보 |
+| `travellerInfo` | Group | C | 100 | 승객 정보 (이름 요소 포함) |
+| `originDestinationDetails` | Group | C | 50 | 여정(출발/도착) 정보 |
+| `dataElementsMaster` | Group | C | 1 | Data Element 마스터 그룹 |
+| `dataElementsMaster/dataElementsIndiv` | Group | C | 9999 | 개별 Data Element (SSR, TK, Remark, FP 등) |
+| `tstData` | Group | C | 100 | TST(Transitional Stored Ticket) 요소 |
+| `pricingRecordGroup` | Group | C | 1 | 운임 레코드 그룹 |
+| `dcsData` | Group | C | 1 | DCS(Departure Control System) 데이터 |
+
+---
+
+## 4. 주요 데이터 구조
+
+### 4-1. pnrHeader (PNR 헤더)
+
+PNR의 메타 정보를 담는 최상위 그룹입니다.
+
+**reservationInfo** (예약 참조)
+
+| 필드 | 설명 |
+|------|------|
+| `controlNumber` | Record Locator (예약 번호). 보통 6자리 영숫자. 예: `ABCD12` |
+| `controlType` | 참조 유형 코드 |
+
+**securityInformation** (보안 정보)
+
+| 필드 | 설명 |
+|------|------|
+| 내용 | PNR 요소별 Amadeus 보안 정보(오피스 접근 수준 등)를 지정 |
+
+**queueInformations** (큐 정보)
+
+| 필드 | 설명 |
+|------|------|
+| 내용 | 오피스 번호, 큐 번호, 카테고리 번호, 날짜 범위 등 큐 식별 정보 |
+
+**pnrType** (PNR 특수 유형)
+
+| 필드 | 설명 |
+|------|------|
+| `attributeType` | PNR 특수 유형 코드 (예: 그룹 PNR, 웨이트리스트 등) |
+
+**technicalData** (기술 데이터)
+
+| 필드 | 설명 |
+|------|------|
+| `enveloppeNumberData` | 마지막 EOT(End of Transaction) 시 발급된 Envelope 번호 |
+| `purgeDateData` | 조회 시점의 PNR Purge Date (자동 삭제 예정일) |
+
+**sbrPOSDetails / sbrCreationPosDetails / sbrUpdatorPosDetails**
+
+| 구조 | 설명 |
+|------|------|
+| `sbrPOSDetails` | SBR 레벨 POS(Point of Sale) 정보 - PNR 소유 오피스 |
+| `sbrCreationPosDetails` | PNR 생성 오피스 정보 |
+| `sbrUpdatorPosDetails` | 마지막 업데이트 오피스 정보 |
+
+---
+
+### 4-2. travellerInfo (승객 정보)
+
+승객별 이름 및 기본 정보를 담습니다. 최대 100명 반복 가능합니다.
+
+**elementManagementPassenger** (요소 관리)
+
+| 필드 | 설명 |
+|------|------|
+| `reference` | 요소 Tattoo 번호. PNR 내 요소 고유 식별자 |
+| `segmentName` | 세그먼트/요소 유형 코드. → [PNR 세그먼트/요소 코드](#pnr-세그먼트요소-코드) 참조 |
+
+**passengerData** (승객 데이터, 최대 2회 반복 - 성인/유아)
+
+| 필드 | 설명 |
+|------|------|
+| `travellerInformation/traveller/surname` | 성(Last Name) |
+| `travellerInformation/traveller/type` | 승객 유형 코드 (예: `ADT`, `CHD`, `INF`) |
+| `travellerInformation/passenger/firstName` | 이름(First Name) + 경칭(Title) |
+| `travellerInformation/passenger/type` | 승객 세부 유형 |
+| `groupCounters` | 그룹 PNR의 경우 예약/취소/분리 카운터 |
+| `dateOfBirth` | 유·소아 생년월일 (DDMMYYYY 형식) |
+
+**enhancedPassengerData** (확장 승객 데이터)
+
+| 필드 | 설명 |
+|------|------|
+| `enhancedTravellerInformation` | UTF-8 인코딩 이름 또는 복수 이름(Native/Universal)을 포함한 승객 상세 정보 |
+
+<Note title="Tattoo와 Line Number">
+PNR 내 각 요소는 **Tattoo** 번호로 식별됩니다. 승객 Tattoo는 SSR, 좌석, 발권 등 다른 요소와 승객을 연결하는 기준이 됩니다.
+</Note>
+---
+
+### 4-3. originDestinationDetails (여정 정보)
+
+출발/도착 구간별 항공편 정보를 담습니다. 최대 50개 OD(Origin-Destination) 그룹이 반복됩니다.
+
+**originDestination** (출발/도착)
+
+| 필드 | 설명 |
+|------|------|
+| `origin` | 출발 공항 IATA 코드 |
+| `destination` | 도착 공항 IATA 코드 |
+
+**itineraryInfo** (여정 세그먼트, 최대 99회 반복)
+
+**elementManagementItinerary** (세그먼트 관리)
+
+| 필드 | 설명 |
+|------|------|
+| `reference` | 세그먼트 Tattoo 번호 |
+| `lineNumber` | 여정 라인 번호 |
+| `segmentName` | 세그먼트 유형 코드 (예: `AIR`, `HTL`, `CAR`) |
+
+**travelProduct** (여행 상품)
+
+| 필드 | 설명 |
+|------|------|
+| `depDate` | 출발일 (ddMMyy 형식) |
+| `depTime` | 출발 시간 (HHmm 형식) |
+| `arrDate` | 도착일 |
+| `arrTime` | 도착 시간 |
+| `boardpointDetail/cityCode` | 출발 공항 코드 |
+| `offpointDetail/cityCode` | 도착 공항 코드 |
+| `company/code` | 마케팅 항공사 코드 (2자리) |
+| `flightOrtrainNumber` | 항공편 번호 |
+| `productDetails/classOfService` | 예약 클래스(RBD). 예: Y, B, H, K |
+| `productDetails/subtype` | 상품 서브타입 |
+
+**relatedProduct** (좌석/예약 상태)
+
+| 필드 | 설명 |
+|------|------|
+| `quantity` | 좌석 수 |
+| `status` | 세그먼트 상태 코드. → [세그먼트 상태 코드](#세그먼트-상태-코드) 참조 |
+
+**itineraryReservationInfo** (GDS 예약 참조)
+
+| 필드 | 설명 |
+|------|------|
+| `reservation/controlNumber` | 항공사 PNR 번호 (Airline Record Locator) |
+| `reservation/controlType` | 참조 유형 |
+
+**flightDetail** (항공편 상세)
+
+| 필드 | 설명 |
+|------|------|
+| `referencedEquipment/description` | 기재 코드 (예: 388, 789, 77W) |
+| `stops/value` | 경유 횟수 |
+
+**cabinDetails** (캐빈 정보)
+
+| 필드 | 설명 |
+|------|------|
+| `cabinClassOfService` | 예약된 캐빈 클래스 코드 (F/C/W/Y 등) |
+| `bookingClassDetails/designator` | RBD 코드 |
+
+**segmentGroupingInfo** (세그먼트 결합/연결)
+
+| 필드 | 설명 |
+|------|------|
+| 내용 | 세그먼트 Marriage, Connection, Bound 정보. 최대 50회 반복 |
+
+**carbonDioxydeInfo** (CO2 정보)
+
+| 필드 | 설명 |
+|------|------|
+| `carbonDioxydeAmount` | 해당 구간의 1인당 CO2 배출량 |
+| `carbonDioxydeInfoSource` | CO2 산출 방식 설명 |
+
+---
+
+### 4-4. dataElementsIndiv (Data Element)
+
+PNR의 모든 Data Element(SSR, TK, Remark, FP, AP 등)를 담는 핵심 그룹입니다. 최대 9,999개 반복 가능합니다.
+
+**elementManagementData** (요소 관리)
+
+| 필드 | 설명 |
+|------|------|
+| `reference/tattoo` | 요소 Tattoo 번호 |
+| `segmentName` | 요소 유형 코드. → [PNR 세그먼트/요소 코드](#pnr-세그먼트요소-코드) 참조 |
+
+**serviceRequest (SSR/OSI)** - `segmentName = SSR` 또는 `OS`
+
+| 필드 | 설명 |
+|------|------|
+| `ssr/type` | SSR 유형 코드 (예: `WCHR`, `VGML`, `DOCS`, `FQTV`) |
+| `ssr/status` | SSR 상태 코드 (HK/HL/HN/UC/UN 등) |
+| `ssr/quantity` | 수량 |
+| `ssr/companyId` | 대상 항공사 코드 |
+| `ssr/freetext` | SSR 자유 텍스트 내용 |
+
+**ticketElement (TK)** - `segmentName = TK`
+
+| 필드 | 설명 |
+|------|------|
+| `ticket/indicator` | 발권 지시자 코드 (예: `OK`, `TL`, `XL`) |
+| `ticket/date` | 발권 기한 또는 발권 날짜 |
+| `ticket/time` | 발권 시간 |
+| `ticket/officeId` | 발권 오피스 ID |
+| `ticket/controlNumber` | 발권 제어 번호 |
+
+**miscellaneousRemarks (RM/RC/RI/RQ)** - Remark 요소
+
+| 필드 | 설명 |
+|------|------|
+| `remarks/type` | Remark 유형 코드. → [Remark Type 코드](#remark-type-코드) 참조 |
+| `remarks/freetext` | Remark 텍스트 내용 |
+| `remarks/category` | Remark 카테고리 (주제 구분자) |
+
+**accounting (AI)** - 회계 정보
+
+| 필드 | 설명 |
+|------|------|
+| 내용 | 회계 정보 요소(AI). 정산·청구 목적의 참조 코드 |
+
+**optionElement (OP)** - 옵션 요소
+
+| 필드 | 설명 |
+|------|------|
+| 내용 | OP 요소. 예약 옵션 및 부가 서비스 정보 |
+
+**structuredFop** (FP - Form of Payment)
+
+| 필드 | 설명 |
+|------|------|
+| 내용 | 결제 수단 정보. → [Form of Payment 코드](#form-of-payment-코드) 참조 |
+
+**seatPaxInfo** (좌석 배정 정보, 최대 9회 반복)
+
+| 필드 | 설명 |
+|------|------|
+| `seatPaxDetails/seatCharacteristics` | 좌석 특성 코드. 예: `A`(Aisle), `W`(Window), `B`(Bassinet) |
+| `seatPaxDetails/seatNumber` | 배정된 좌석 번호. 예: `12A` |
+| `crossRef` | 해당 좌석과 연결된 승객 Tattoo |
+
+**pnrSecurity (ES)** - 개별 PNR 보안
+
+| 필드 | 설명 |
+|------|------|
+| 내용 | 요소 레벨 접근 보안 설정 |
+
+---
+
+### 4-5. tstData (TST - 운임 저장 레코드)
+
+TST(Transitional Stored Ticket)는 GDS에 저장된 운임 계산 결과입니다. 최대 100개 반복 가능합니다.
+
+**tstGeneralInformation** (TST 일반 정보)
+
+| 필드 | 설명 |
+|------|------|
+| `documentDetails/inHouseIdentification1` | TST 식별 번호 |
+| `status/indicator` | TST 상태 (예: `ET` = Electronic Ticket 가능) |
+
+**fareBasisInfo** (운임 기준)
+
+| 필드 | 설명 |
+|------|------|
+| `fareBasisDetails/fareBasisCode` | Fare Basis Code. 예: `YLOWKR`, `BSAVER` |
+| `fareBasisDetails/ticketDesignator` | 발권 지시자 |
+
+**fareData** (운임 데이터)
+
+| 필드 | 설명 |
+|------|------|
+| 내용 | 기준 운임, 세금, 총액 등 운임 상세 정보 |
+
+**segmentAssociation** (구간 연결)
+
+| 필드 | 설명 |
+|------|------|
+| 내용 | TST와 연결된 여정 구간 정보 |
+
+---
+
+### 4-6. mcoRecord (MCO 레코드)
+
+MCO(Miscellaneous Charge Order) 관련 데이터를 담습니다.
+
+| 필드 | 설명 |
+|------|------|
+| `mcoType` | MCO 요소 존재 여부 시각적 표시자 |
+| `mcoInformation` | MCO 요소 상세 데이터 |
+| `groupOfFareElements` | 운임 요소 그룹 (최대 20개) |
+
+---
+
+### 4-7. dcsData (DCS 데이터)
+
+DCS(Departure Control System) 체크인 관련 데이터입니다.
+
+| 구조 | 설명 |
+|------|------|
+| `segmentSection` | 세그먼트 레벨 DCS 데이터 (최대 19,602회: 198 PAX × 99 세그먼트) |
+| `legSection` | Leg 레벨 DCS 데이터 (최대 176,418회: 9 Leg × 99 세그먼트 × 198 PAX) |
+| `seatDelivery` | DCS가 배정한 좌석 정보 |
+| `paxStatus` | 승객 체크인 상태 (NOREC 플래그, 수락 상태, 탑승 상태, 캐빈 업그레이드 유형 등) |
+| `acceptanceChannel` | 체크인 수락 채널 (카운터 에이전트/직접/자동화 기기/웹 등) |
+| `compensationData` | 탑승 거부 보상 정보 (보상 유형, 통화, 금액) |
+
+---
+
+## 5. 주요 코드셋
+
+### Retrieval type 코드
+
+PNR 조회 방식을 지정합니다.
+
+| 코드 | 의미 |
+|------|------|
+| `1` | Redisplay (현재 PNR 재표시) |
+| `2` | Retrieve by Record Locator (예약 번호로 조회) |
+| `3` | Retrieve by office and name (오피스 + 이름으로 조회) |
+| `4` | Retrieve by service and name (서비스 + 이름으로 조회) |
+| `5` | Retrieve by frequent traveller (FF 번호로 조회) |
+| `6` | Retrieve by account number (계좌 번호로 조회) |
+| `7` | Retrieve by customer profile (고객 프로파일로 조회) |
+| `8` | Retrieve by Insurance policy number (보험 증권 번호로 조회) |
+| `9` | Retrieve by numeric record locator (숫자 예약 번호로 조회) |
+| `25` | Retrieve from List (목록에서 조회) |
+| `95` | Retrieve for ticketing (발권용 조회) |
+
+---
+
+### 세그먼트 상태 코드
+
+항공 세그먼트 및 SSR의 예약 상태를 나타냅니다.
+
+| 코드 | 의미 |
+|------|------|
+| `HK` | Holding Confirmed (예약 확정) |
+| `HL` | Holding Waitlist (웨이트리스트 대기 중) |
+| `HN` | Holding Need (좌석 필요 상태) |
+| `HX` | Have Cancelled (취소됨) |
+| `HD` | Holding Confirmed; EMD required (EMD 필요) |
+| `HI` | Holding Confirmed; EMD issued (EMD 발행 완료) |
+| `KK` | Confirming / Confirmed no EMD required |
+| `KD` | Service Confirmed subject to EMD issue |
+| `NN` | Need Segment (항공사 확인 요청) |
+| `NO` | No Action taken (조치 없음) |
+| `NS` | Infant no seat (유아 좌석 없음) |
+| `OK` | Confirmed (확정) |
+| `UC` | Unable to confirm (확정 불가) |
+| `UN` | Unable - special service not provided |
+| `WL` | Waitlisted (웨이트리스트) |
+| `SA` | Space Available (공간 있음) |
+| `SB` | Standby (대기) |
+| `SD` | Schedule change/rebooking; EMD already issued |
+| `RQ` | Requested (요청됨) |
+| `X` | Cancel (취소) |
+| `UX` | Have Cancelled (HX와 동일) |
+
+<Note title="GDS 상태 코드의 의미">
+`HK`(Holding Confirmed)는 GDS 측 확정 상태이며, `KK`(Confirming)는 항공사 시스템에서 확인된 상태입니다. `NN`은 GDS가 항공사에 좌석을 요청 중인 과도 상태입니다.
+</Note>
+---
+
+### PNR 세그먼트/요소 코드
+
+`segmentName` 필드에서 사용되는 PNR 구성 요소 유형 코드입니다.
+
+#### 세그먼트 유형
+
+| 코드 | 의미 |
+|------|------|
+| `AIR` | 항공 세그먼트 |
+| `ATX` | Air Taxi 세그먼트 (비자동화) |
+| `CAR` | 렌터카 세그먼트 (수동) |
+| `CCR` | 렌터카 세그먼트 (자동화) |
+| `CRU` | 크루즈 세그먼트 |
+| `FRR` | 페리 세그먼트 |
+| `HHL` | 호텔 세그먼트 (자동화) |
+| `HTL` | 호텔 세그먼트 (수동) |
+| `INS` | 보험 세그먼트 |
+| `MCO` | Miscellaneous Charges Order |
+| `MIS` | 기타 세그먼트 |
+| `SUR` | 지상 교통(Surface) 세그먼트 |
+| `TRN` | 열차 세그먼트 |
+| `TTO` | 투어 소스 세그먼트 |
+| `TUR` | 투어 세그먼트 |
+
+#### Data Element 유형 (주요)
+
+| 코드 | 의미 |
+|------|------|
+| `AB` | Billing Address 요소 |
+| `AB/` | Structured Billing Address 요소 |
+| `AI` | Accounting Information 요소 |
+| `AM` | Mailing Address 요소 |
+| `AP` | Contact(연락처) 요소 |
+| `ES` | Individual PNR Security 요소 |
+| `FA` | Ticket Number (자동 발권) 요소 |
+| `FD` | Fare Discount 요소 |
+| `FE` | Endorsements/Restrictions 요소 |
+| `FH` | Manual Document Registration 요소 |
+| `FHA` | Manual Document Registration (자동 티켓 번호 포함) |
+| `FHE` | Manual Document Registration (전자 티켓 번호 포함) |
+| `FM` | Commission 요소 |
+| `FO` | Original Issue / Issue in Exchange 요소 |
+| `FP` | Form of Payment 요소 |
+| `FS` | Miscellaneous Ticketing Information 요소 |
+| `FT` | Tour Code 요소 |
+| `FV` | Ticketing Carrier Designator 요소 |
+| `FZ` | Miscellaneous Information 요소 |
+| `NFP` | Neutral Form of Payment 요소 |
+| `NG` | Group Name 요소 |
+| `OP` | Option 요소 |
+| `OS` | Other Special Information(OSI) 요소 |
+| `RC` | Confidential Remark 요소 |
+| `RF` | Receive From 요소 |
+| `RIF` | Invoice Remark 요소 |
+| `RII` | Invoice and Itinerary Remark 요소 |
+| `RIR` | Itinerary Remark 요소 |
+| `RM` | General Remark 요소 |
+| `RQ` | Quality Control Remark 요소 |
+| `RR` | Associated Cross Reference Record 요소 |
+| `SP` | Split Party 요소 |
+| `SSR` | Special Service Request 요소 |
+| `TK` | Ticket(발권) 요소 |
+| `WA` | Warning Line |
+
+---
+
+### Remark Type 코드
+
+Remark 요소의 유형을 구분합니다.
+
+| 코드 | 의미 |
+|------|------|
+| `RC` | Confidential remark (기밀 비고) |
+| `RI` | Invoice remark (인보이스 비고) |
+| `RM` | Miscellaneous remark (일반 비고) |
+| `RQ` | Quality control remark (품질 관리 비고) |
+| `RIF` | Invoice Remark |
+| `RII` | Itinerary & Invoice Remark |
+| `RIR` | Itinerary Remark |
+
+---
+
+### Form of Payment 코드
+
+FP(Form of Payment) 요소에서 사용되는 결제 수단 코드입니다.
+
+| 코드 | 의미 |
+|------|------|
+| `CA` | Cash (현금) |
+| `CC` | Credit Card (신용카드) |
+| `CK` | Check (수표) |
+| `ACC` | Account payment (계좌 결제) |
+| `AGT` | Agent document 기반 결제 |
+| `GR` | Government transportation request |
+| `INV` | Invoice (인보이스) |
+| `MS` | Miscellaneous (기타) |
+| `NR` | Non-refundable (환불 불가) |
+| `PT` | Prepaid Ticket Advice (PTA) |
+| `UN` | United Nations Transportation Request |
+| `WA` | Web redirection account payment |
+| `WF` | Web redirection fund transfer payment |
+
+---
+
+### Fare type 코드
+
+TST의 운임 유형 코드입니다.
+
+| 코드 | 의미 |
+|------|------|
+| `AD` | Agent 할인 운임 |
+| `CH` | Child 운임 |
+| `IN` | Infant 운임 |
+| `IT` | Individual Inclusive Tour 운임 |
+| `SD` | Student 운임 |
+| `mm` | Military 운임 |
+| `CD` | Senior Citizen 운임 |
+| `CG` | Tour Conductor 운임 |
+| `CL` | Clergy 운임 |
+| `SC` | Seaman 운임 |
+| `db` | Seriously Disabled Passenger 운임 |
+
+---
+
+### Seat characteristic 코드
+
+좌석 특성 코드입니다.
+
+| 코드 | 의미 |
+|------|------|
+| `A` | Aisle seat (통로 측 좌석) |
+| `W` | Window seat (창가 측 좌석) |
+| `B` | Seat with bassinet facility (바시넷 설치 가능 좌석) |
+| `C` | Crew seat (승무원 좌석) |
+| `H` | Seat with facilities for Handicapped (장애인 시설 좌석) |
+| `I` | Seat suitable for adult with an infant (유아 동반 성인 적합 좌석) |
+| `WA` | Window and Aisle together (창가·통로 동시 해당) |
+
+---
+
+### Business function 코드
+
+여정 세그먼트의 서비스 유형을 분류합니다.
+
+| 코드 | 의미 |
+|------|------|
+| `1` | Air Provider (항공) |
+| `2` | Car Provider / Hotel Provider |
+| `3` | Hotel Provider |
+| `6` | Rail (철도) |
+| `7` | Tour (투어) |
+| `8` | Hotel (항공사를 통한 호텔 예약) |
+| `9` | Car (항공사를 통한 렌터카 예약) |
+| `10` | Air Taxi (ATX) |
+| `11` | Tour (항공사를 통한 투어) |
+| `12` | Surface (지상 교통) |
+| `13` | Tour (투어 오퍼레이터 직접 요청) |
+| `32` | Miscellaneous (기타) |
+
+---
+
+## 6. 데이터 형식 표기법
+
+PNR_Retrieve 문서에서 사용되는 데이터 형식 표기 규칙입니다.
+
+| 표기 | 의미 |
+|------|------|
+| `an..x` | 최대 x자리 영숫자 (가변 길이) |
+| `anx` | 정확히 x자리 영숫자 (고정 길이) |
+| `a..x` | 최대 x자리 알파벳 (가변 길이) |
+| `n..x` | 최대 x자리 숫자 (가변 길이) |
+| `ax` | 정확히 x자리 알파벳 (고정 길이) |
+| `nx` | 정확히 x자리 숫자 (고정 길이) |
+
+| 상태(St) | 의미 |
+|----------|------|
+| `M` | Mandatory (필수) |
+| `C` | Conditional (조건부 - 상황에 따라 필수 또는 생략 가능) |
+| `M*` | Mandatory (IATA PADIS에서는 Conditional이나 Amadeus 구현에서는 필수) |
+
+---
+
+## 7. 약어 모음
+
+| 약어 | 풀네임 | 설명 |
+|------|--------|------|
+| AI | Accounting Information | 회계 정보 요소 |
+| AP | Address/Phone | 연락처 요소 (전화/이메일) |
+| DCS | Departure Control System | 출발 통제 시스템 (체크인 시스템) |
+| EMD | Electronic Miscellaneous Document | 전자 기타 문서 |
+| EOT | End of Transaction | 트랜잭션 종료 (PNR 저장 완료) |
+| FOP | Form of Payment | 결제 수단 |
+| FF | Frequent Flyer | 상용 고객 프로그램 |
+| MCO | Miscellaneous Charge Order | 기타 청구서 |
+| OSI | Other Service Information | 기타 서비스 정보 (정보 전달용, 상태 코드 없음) |
+| PNR | Passenger Name Record | 승객 이름 기록 (예약 레코드) |
+| POS | Point of Sale | 판매 지점 (예약 생성 오피스) |
+| PTA | Prepaid Ticket Advice | 선불 항공권 조언 |
+| RBD | Reservation Booking Designator | 예약 등급 지시자 (예약 클래스) |
+| RL | Record Locator | 예약 번호 (6자리 영숫자 코드) |
+| RFISC | Reason For Issuance Sub Code | 발행 사유 서브 코드 |
+| RFIC | Reason For Issuance Code | 발행 사유 코드 |
+| SBR | Single Booking Record | 단일 예약 레코드 (Amadeus PNR의 내부 명칭) |
+| SSR | Special Service Request | 특별 서비스 요청 (기내식, 휠체어, 여권 정보 등) |
+| TK | Ticket element | 발권 요소 (TL/OK 등 발권 기한 및 상태) |
+| TL | Time Limit | 발권 기한 |
+| TST | Transitional Stored Ticket | 임시 저장 티켓 (운임 계산 결과 저장) |
+
+---
+
+## 참고
+
+<CardGroup cols={2}>
+  <Card title="WBS Integration Flow - Step 11-12" href="/amadeus-wbs-integration-flow" icon="link" />
+  <Card title="Fare_PricePNRWithBookingClass 용어집" href="/ticketing/fare-price-pnr-with-booking-class" icon="link" />
+  <Card title="PNR_AddMultiElements 용어집" href="/booking/pnr-add-multi-elements" icon="link" />
+  <Card title="SalesReports_DisplayQueryReport 용어집" href="/post-issuance/sales-reports" icon="link" />
+  <Card title="Cancellation Flow 용어집" href="/post-issuance/cancellation-flow" icon="link" />
+</CardGroup>

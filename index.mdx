@@ -1,0 +1,93 @@
+---
+title: "Flight Tech Glossary"
+description: "Amadeus WBS Integration 기반 항공 기술 용어집"
+---
+
+Amadeus Enterprise SOAP API의 기술 용어를 정리한 문서입니다.
+IBE(Internet Booking Engine) 기반 WBS Integration Flow의 **검색 → 가격조회 → 예약 → 발권 → 정산 → 취소** 전 과정을 19개 API 문서로 다룹니다.
+
+## WBS Integration Flow
+
+검색부터 취소까지의 전체 플로우를 단계별로 확인하세요.
+
+<Card title="WBS Integration Flow 전체 보기" icon="route" href="/amadeus-wbs-integration-flow">
+  19개 API 문서를 기반으로 한 IBE 예약 전체 플로우 가이드
+</Card>
+
+## API 용어집
+
+<Tabs>
+  <Tab title="검색">
+    <CardGroup cols={2}>
+      <Card title="Step 1. Fare_MasterPricerCalendar" icon="calendar" href="/search/fare-master-pricer-calendar">
+        날짜 유연 검색 — 기준일 전후 최저가 달력 탐색
+      </Card>
+      <Card title="Step 2. MasterPricerTravelBoardSearch" icon="magnifying-glass" href="/search/master-pricer-travelboard-search">
+        확정 날짜 항공편 + 운임 조합 상세 검색
+      </Card>
+    </CardGroup>
+  </Tab>
+  <Tab title="가격/규정">
+    <CardGroup cols={2}>
+      <Card title="Step 3. InformativeBestPricing" icon="bolt" href="/pricing/fare-informative-best-pricing">
+        PNR 없이 최적 운임 자동 계산 (Best Pricer)
+      </Card>
+      <Card title="Step 4. InformativePricing" icon="check" href="/pricing/fare-informative-pricing">
+        운임 확정 조회 + Offer ID 발급
+      </Card>
+      <Card title="Step 5. Fare_CheckRules" icon="file-lines" href="/pricing/fare-check-rules">
+        운임 규정 전문 텍스트 조회 (ATPCO Category)
+      </Card>
+      <Card title="Step 6. MiniRule_GetFromRec" icon="list-check" href="/pricing/minirule-get-from-rec">
+        환불/변경 규정 구조화 데이터 조회
+      </Card>
+    </CardGroup>
+  </Tab>
+  <Tab title="예약">
+    <CardGroup cols={2}>
+      <Card title="Step 7. Air_SellFromRecommendation" icon="plane" href="/booking/air-sell-from-recommendation">
+        선택 항공편 좌석 확보 (Sell)
+      </Card>
+      <Card title="Step 8. PNR_AddMultiElements" icon="user-plus" href="/booking/pnr-add-multi-elements">
+        PNR 생성 — 승객, SSR, 연락처 추가
+      </Card>
+      <Card title="Step 9. FOP_CreateFormOfPayment" icon="credit-card" href="/booking/fop-create-form-of-payment">
+        결제 수단 등록 + FortKnox 토큰화
+      </Card>
+    </CardGroup>
+  </Tab>
+  <Tab title="발권">
+    <CardGroup cols={2}>
+      <Card title="Step 10. PricePNRWithBookingClass" icon="receipt" href="/ticketing/fare-price-pnr-with-booking-class">
+        TST 생성 — 운임 확정 및 발권 준비
+      </Card>
+      <Card title="Step 11-12. PNR_Retrieve" icon="eye" href="/ticketing/pnr-retrieve">
+        발권 전 검증 + 발권 후 항공권 번호 확인
+      </Card>
+    </CardGroup>
+  </Tab>
+  <Tab title="후속 처리">
+    <CardGroup cols={2}>
+      <Card title="Step 13-14. SalesReports" icon="chart-bar" href="/post-issuance/sales-reports">
+        외화/현지 통화 기준 판매 보고서 조회
+      </Card>
+      <Card title="Step 15. Cancellation Flow" icon="ban" href="/post-issuance/cancellation-flow">
+        티켓 취소 + PNR 취소 (3단계 플로우)
+      </Card>
+    </CardGroup>
+  </Tab>
+</Tabs>
+
+## 참고 자료
+
+<CardGroup cols={3}>
+  <Card title="용어 색인 (A-Z)" icon="book" href="/glossary">
+    전체 용어를 알파벳순으로 검색
+  </Card>
+  <Card title="GDS 용어집" icon="globe" href="/reference/gds-terminology">
+    Sabre & Amadeus 공통 기본 용어
+  </Card>
+  <Card title="BSP 정산 가이드" icon="building-columns" href="/reference/bsp-settlement-guide">
+    BSP 정산 흐름 및 항공권 번호 체계
+  </Card>
+</CardGroup>

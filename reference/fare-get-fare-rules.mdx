@@ -1,0 +1,680 @@
+---
+title: "Fare_GetFareRules (운임 규정 조회)"
+description: "Amadeus FareGetFareRules API(버전 10.1)의 기술 용어를 정리한 문서입니다. 항공권의 운임 규정(Fare Rule)을 Category별로 조회하는 API로, 변경·환불 조건, 최소/최대 체류기간, 사전구매 기한, 시즌 제한 등의 규정 텍스트를 반환합니다."
+sidebarTitle: "Fare_GetFareRules"
+---
+
+Amadeus `Fare_GetFareRules` API(버전 10.1)의 기술 용어를 정리한 문서입니다. 항공권의 운임 규정(Fare Rule)을 Category별로 조회하는 API로, 변경·환불 조건, 최소/최대 체류기간, 사전구매 기한, 시즌 제한 등의 규정 텍스트를 반환합니다.
+
+---
+
+## 1. 개요
+
+**Fare_GetFareRules**는 특정 운임(Fare)에 적용되는 ATPCO Rule Category별 규정 전문을 조회하는 Amadeus API입니다.
+
+- **Query**: 운임 식별 정보(항공사, Fare Basis, 구간 등)와 조회할 Category 번호를 지정
+- **Reply**: Category별 규정 텍스트(fareRuleText)와 Coded Attribute(Mini Rules)를 반환
+
+<Info title="용도">
+발권 전 환불·변경 규정 확인, 운임 규정 전문 표시, Mini Rules(coded attributes) 조회에 활용됩니다. Master Pricer 검색 결과의 운임에 대해 상세 규정을 조회할 때 주로 사용합니다.
+</Info>
+<Note title="ATPCO Rule Category란?">
+ATPCO(Airline Tariff Publishing Company)가 표준화한 운임 규정 분류 체계입니다. 항공사들은 각 Category 번호에 해당하는 규정을 ATPCO에 신고하며, GDS는 이를 조회하여 여행사에 제공합니다.
+</Note>
+---
+
+## 2. Query 구조 (요청)
+
+### 최상위 요청 구조
+
+| 엔티티 | 구조명 | 필수 | 반복 | 설명 |
+|--------|--------|------|------|------|
+| `msgType` | Message action details | M | 1 | 메시지 기능 한정자 |
+| `availCabinConf` | Product information | C | 1 | 예약 클래스(RBD) 또는 캐빈 정보 |
+| `conversionRate` | Conversion rate | C | 1 | 통화 환산 관련 정보 |
+| `pricingTickInfo` | Pricing/ticketing details | C | 1 | 발권 옵션 및 날짜 정보 |
+| `multiCorporate` | Corporate number/name | C | 1 | 법인 계약 번호/이름 |
+| `corporateInfo` | Corporate fare information | C | 1 | 법인 운임 정보 |
+| `monetaryInfo` | Monetary information | C | 1 | 금액 정보 |
+| `itemNumber` | Item number | C | 1 | 항목 번호 |
+| `dateOfFlight` | Date and time information | C | 1 | 항공편 날짜 |
+| `flightQualification` | Fare qualifier details | C | 99 | 운임 한정 조건 |
+| `transportInformation` | Group | C | 99 | 항공편 정보 그룹 |
+| `tripDescription` | Group | C | 99 | 여정 정보 그룹 |
+| `pricingInfo` | Group | C | 9 | 가격 정보 그룹 |
+
+### transportInformation 그룹
+
+운임 조회 대상 항공편을 지정합니다.
+
+| 엔티티 | 구조명 | 필수 | 설명 |
+|--------|--------|------|------|
+| `transportService` | Transport identifier | M | 항공사 코드 및 편명 |
+| `availCabinConf` | Product information | C | 예약 클래스 |
+| `routingInfo` | Routing information | C | 경유지 정보 |
+| `selectionDetail` | Selection details | C | 선택 조건 |
+
+### tripDescription 그룹
+
+여정의 출발지·도착지 정보를 담습니다.
+
+| 엔티티 | 구조명 | 필수 | 설명 |
+|--------|--------|------|------|
+| `origDest` | Origin and destination details | M | 출발지·도착지 |
+| `dateFlightMovement` | Date and time information | C | 항공편 일자 |
+| `routing` | Group | C | 구간별 경로 그룹 (최대 99회 반복) |
+
+### fare 그룹
+
+조회 대상 운임을 특정합니다.
+
+| 엔티티 | 구조명 | 필수 | 설명 |
+|--------|--------|------|------|
+| `detailsOfFare` | Fare information | M | 운임 상세 정보 |
+| `fareQualificationDetails` | Fare qualifier details | C | 운임 한정 상세 (최대 99회) |
+| `fareRule` | Group | C | 규정 그룹 |
+
+### fareRule 그룹
+
+조회할 Rule Category를 지정합니다.
+
+| 엔티티 | 구조명 | 필수 | 설명 |
+|--------|--------|------|------|
+| `tarifFareRule` | Fare rules information | M | 항공사 코드, Category 번호 지정 |
+| `travellerIdentification` | Reference information | C | 여행자 참조 번호 |
+| `travellerDate` | Date and time information | C | 여행자 관련 날짜 |
+| `locationInfo` | Location details | C | 도시·공항·국가 코드 |
+
+---
+
+## 3. Reply 구조 (응답)
+
+### 최상위 응답 구조
+
+| 엔티티 | 구조명 | 필수 | 반복 | 설명 |
+|--------|--------|------|------|------|
+| `transactionType` | Message action details | M | 1 | 처리 결과 유형 |
+| `statusInfo` | Status details | C | 1 | 메시지 처리 상태 |
+| `fareRouteInfo` | Fare route information | C | 1 | 운임 경로 정보 |
+| `infoText` | Interactive free text | C | 999 | 안내 텍스트 |
+| `errorInfo` | Group | C | 1 | 오류 정보 그룹 |
+| `tariffInfo` | Group | C | 999 | 운임 규정 정보 그룹 (핵심) |
+| `flightDetails` | Group | C | 999 | 항공편 상세 정보 그룹 |
+
+### errorInfo 그룹
+
+| 엔티티 | 구조명 | 필수 | 설명 |
+|--------|--------|------|------|
+| `rejectErrorCode` | Application error information | M | 애플리케이션 오류 코드 |
+| `errorFreeText` | Interactive free text | C | 오류 관련 자유 텍스트 |
+
+### tariffInfo 그룹 (핵심)
+
+운임별 규정 정보를 담는 핵심 그룹입니다. 최대 999회 반복됩니다.
+
+| 엔티티 | 구조명 | 필수 | 반복 | 설명 |
+|--------|--------|------|------|------|
+| `fareRuleInfo` | Fare rules information | M | 1 | 운임 규정 식별 정보 (항공사, Category 코드, Rule 번호) |
+| `fareRuleText` | Interactive free text | C | 999 | Category별 규정 전문 텍스트 |
+| `codedAttributesInfo` | Coded attribute | C | 1 | 코드화된 규정 요약 (Mini Rules) |
+
+### flightDetails 그룹
+
+항공편별 통화·날짜·운임 상세 정보입니다.
+
+| 엔티티 | 구조명 | 필수 | 반복 | 설명 |
+|--------|--------|------|------|------|
+| `nbOfSegments` | Segment repetition control | M | 1 | 구간 수 |
+| `selectedPartInfo` | Selection details | C | 1 | 정보 유형 지정 |
+| `amountConversion` | Conversion rate | C | 1 | 통화 환산 정보 |
+| `quantityValue` | Quantity | C | 1 | 수량 정보 |
+| `pricingAndDateInfo` | Pricing/ticketing details | C | 1 | 발권 일자 및 옵션 |
+| `qualificationFareDetails` | Fare qualifier details | C | 99 | 운임 한정 조건 |
+| `transportService` | Transport identifier | C | 4 | 항공편 정보 |
+| `flightErrorCode` | Interactive free text | C | 999 | 항공편 관련 오류 |
+| `productInfo` | Group | C | 99 | 예약 클래스 정보 |
+| `priceInfo` | Group | C | 99 | 금액·세금 정보 |
+| `fareTypeInfo` | Group | C | 99 | 운임 유형 정보 |
+
+---
+
+## 4. 주요 데이터 구조
+
+### 4-1. Fare Rules Information (운임 규정 식별 정보)
+
+`fareRuleInfo` 및 `tarifFareRule`에서 사용됩니다. 조회할 운임 규정의 식별자를 담습니다.
+
+| 필드 | 형식 | 설명 |
+|------|------|------|
+| `tariffClassId` | an..9 | 운임 Tariff 번호 (예: `70`) |
+| `companyDetails.marketingCompany` | an..3 | 마케팅 항공사 코드 (예: `KE`, `OZ`) |
+| `companyDetails.operatingcompany` | an..3 | 실제 운항 항공사 코드 |
+| `companyDetails.otherCompany` | an..3 | 기타 항공사 코드 |
+| `ruleSectionId` / `ruleCategoryCode` | an..7 | Rule Category 코드 → [Rule Category 코드](#rule-category-코드) 참조 |
+| `ruleNumber` | an..9 | 규정 번호 |
+
+### 4-2. Coded Attribute (코드화된 규정 요약)
+
+`codedAttributesInfo`에서 반환되는 Mini Rules 정보입니다. 규정 전문 대신 구조화된 코드로 핵심 조건을 제공합니다.
+
+| 필드 | 형식 | 설명 |
+|------|------|------|
+| `attributeType` | an..5 | 속성 유형 코드 → [Attribute Type 코드](#attribute-type-코드-mini-rules) 참조 |
+| `attributeDescription` | an..60 | 속성 설명 값 |
+
+<Note title="Mini Rules와 Full Rules의 차이">
+- **Mini Rules** (`codedAttributesInfo`): 핵심 규정 조건만 코드화하여 반환. 빠른 표시에 적합
+- **Full Rules** (`fareRuleText`): ATPCO에 등록된 규정 원문 전체 텍스트. 상세 확인 시 사용
+</Note>
+### 4-3. Fare Qualifier Details (운임 한정 조건)
+
+운임의 특성과 조건을 지정합니다.
+
+| 필드 | 형식 | 설명 |
+|------|------|------|
+| `fareCategories` | an..3 | Global Direction 코드 (예: `7AT`=대서양, `7PA`=태평양) → [Global Direction 코드](#global-direction-코드) 참조 |
+| `fareType1` / `fareType2` / `fareType3` | an..20 | 요청 유형 및 파라미터 |
+| `fareDetails.qualifier` | an..3 | 승객 유형 코드 (PTC). 예: `ADT`, `CHD`, `INF` |
+| `fareDetails.rate` | n..8 | 할인율 (%) |
+| `fareDetails.fareCategory` | an..3 | 운임 분류 유형 |
+| `additionalFareDetails.rateClass` | an..35 | Fare Basis 코드. 예: `YLOWKR`, `QOWUS` |
+| `additionalFareDetails.commodityCategory` | an..18 | Ticket Designator |
+| `additionalFareDetails.pricingGroup` | an..35 | 가격 산정 그룹 |
+| `fareOptionDetails.fareQualifier` | an..3 | 운임 한정자 코드 (위약금 등) |
+| `fareOptionDetails.amount` | n..18 | 위약금 금액 |
+| `fareOptionDetails.percentage` | n..8 | 위약금 비율 (%) |
+
+### 4-4. Fare Route Information (운임 경로 정보)
+
+운임이 적용되는 경로와 유효기간 정보입니다.
+
+| 필드 | 형식 | 설명 |
+|------|------|------|
+| `dayOfWeek` | an..7 | 운임 적용 요일 (7자리, 예: `1234567`=매일) |
+| `fareQualifier` | an..3 | 운임 한정자 (예: RT=Round Trip, OW=One Way) |
+| `identificationNumber` | an..35 | 라우팅 번호 |
+| `validityPeriod.firstDate` | n..6 | 운임 발효일 (ddMMyy) |
+| `validityPeriod.secondDate` | n..6 | 운임 종료일 (ddMMyy) |
+
+### 4-5. Pricing/Ticketing Details (발권 옵션)
+
+| 필드 | 형식 | 설명 |
+|------|------|------|
+| `priceTicketDetails.indicators` | an..3 | 가격 유형 한정자 코드 → [Price Type Qualifier 코드](#price-type-qualifier-코드) 참조 |
+| `productDateTimeDetails.ticketingDate` | n6 | 발권 날짜 (ddMMyy) |
+| `locationDetails.city` | an3..5 | 발권 도시 코드 |
+| `locationDetails.country` | an..3 | 발권 국가 코드 |
+| `idNumber` | an..35 | 식별 번호 |
+
+### 4-6. Transport Identifier (항공편 식별)
+
+| 필드 | 형식 | 설명 |
+|------|------|------|
+| `companyIdentification.marketingCompany` | an..3 | 마케팅 항공사 코드 |
+| `companyIdentification.operatingcompany` | an..3 | 실제 운항 항공사 코드 |
+| `companyIdentification.otherCompany` | an..3 | 기타 항공사 코드 |
+| `productIdentificationDetails.flightNumber` | an..4 | 편명 번호 |
+| `productIdentificationDetails.operationalSuffix` | a1 | 편명 접미사 |
+
+### 4-7. Routing Information (경로 정보)
+
+| 필드 | 형식 | 설명 |
+|------|------|------|
+| `routingDetails.station` | a3..5 | 경유지 또는 출발 공항 코드 |
+| `routingDetails.otherStation` | a3..5 | 도착 공항 코드 |
+| `routingDetails.qualifier` | an..3 | 지점 유형 또는 Via 표시자 |
+
+### 4-8. Monetary Information (금액 정보)
+
+| 필드 | 형식 | 설명 |
+|------|------|------|
+| `monetaryDetails.typeQualifier` | an..3 | 금액 유형 한정자 |
+| `monetaryDetails.amount` | an..12 | 세금·수수료 금액 |
+| `monetaryDetails.currency` | an..3 | 통화 코드 (ISO 4217) |
+| `otherMonetaryDetails.typeQualifier` | an..3 | 추가 금액 유형 (XF=PFC, ZP=세금 등) |
+
+### 4-9. Conversion Rate (환율 정보)
+
+| 필드 | 형식 | 설명 |
+|------|------|------|
+| `conversionRateDetails.conversionType` | an..3 | 환산 유형 코드 |
+| `conversionRateDetails.currency` | an..3 | 통화 코드 |
+| `conversionRateDetails.rateType` | an..3 | 환율 유형 |
+| `conversionRateDetails.pricingAmount` | n..18 | 원래 금액 |
+| `conversionRateDetails.convertedValueAmount` | n..18 | 환산된 금액 |
+
+### 4-10. Corporate Fare Information (법인 운임 정보)
+
+| 필드 | 형식 | 설명 |
+|------|------|------|
+| `corporateId.corporateQualifier` | an..3 | 법인 운임 유형 한정자 |
+| `corporateId.identity` | an..35 | 법인 계약 번호 또는 이름 |
+
+### 4-11. Status Details (상태 정보)
+
+응답 처리 상태를 나타냅니다.
+
+| 필드 | 형식 | 설명 |
+|------|------|------|
+| `statusDetails.indicator` | an..3 | 상태 표시자 코드 |
+| `otherDetails.indicator` | an..3 | 추가 상태 표시자 코드 |
+
+### 4-12. Interactive Free Text (자유 텍스트)
+
+`fareRuleText`와 `infoText`에 사용됩니다.
+
+| 필드 | 형식 | 설명 |
+|------|------|------|
+| `freeTextQualification.textSubjectQualifier` | an..3 | 텍스트 주제 한정자 → [Text Subject Qualifier 코드](#text-subject-qualifier-코드) 참조 |
+| `freeTextQualification.informationType` | an..4 | 정보 유형 코드 |
+| `freeText` | an..70 | 규정 텍스트 (최대 999줄) |
+
+### 4-13. Segment Repetition Control (구간 반복 제어)
+
+| 필드 | 형식 | 설명 |
+|------|------|------|
+| `segmentControlDetails.quantity` | n..15 | 수량 |
+| `segmentControlDetails.numberOfUnits` | n..15 | 단위 수 |
+| `segmentControlDetails.totalNumberOfItems` | n..15 | 총 항목 수 |
+
+---
+
+## 5. 주요 코드셋
+
+### Rule Category 코드
+
+ATPCO에서 정의한 운임 규정 Category 분류입니다. `ruleSectionId` 및 `ruleCategoryCode` 필드에 괄호 포함 형식(`(5)`)으로 사용됩니다.
+
+| Category | 설명 |
+|----------|------|
+| `(1)` | Eligibility (자격 조건) |
+| `(2)` | Day/Time (요일/시간 제한) |
+| `(3)` | Seasonability (시즌 적용) |
+| `(4)` | Flight Application (적용 항공편) |
+| `(5)` | Advance Purchase (사전 구매 기한) |
+| `(6)` | Minimum Stay (최소 체류기간) |
+| `(7)` | Maximum Stay (최대 체류기간) |
+| `(8)` | Stopovers (경유 조건) |
+| `(9)` | Transfer (환승 조건) |
+| `(10)` | Combinations (운임 결합 조건) |
+| `(11)` | Blackout dates (블랙아웃 날짜) |
+| `(12)` | Surcharge (할증 요금) |
+| `(13)` | Accompanied Travel (동반 여행) |
+| `(14)` | Travel restrictions (여행 제한) |
+| `(15)` | Sales restrictions (판매 제한) |
+| `(16)` | Penalties (위약금·환불 규정) |
+| `(17)` | Higher intermediate point (높은 중간 지점) |
+| `(18)` | Ticket endorsement (발권 배서) |
+| `(19)` | Children discount (소아 할인) |
+| `(20)` | Tour conductor discount (인솔자 할인) |
+| `(21)` | Agent discount (대리점 할인) |
+| `(22)` | All other discounts (기타 할인) |
+| `(23)` | Miscellaneous Provisions (기타 규정) |
+| `(25)` | Fare by Rule (규정 기반 운임) |
+| `(26)` | Group (단체 조건) |
+| `(27)` | Tours (투어 조건) |
+| `(28)` | Visit an other country (타국 방문 조건) |
+| `(29)` | Deposit (보증금) |
+| `(31)` | Reissue / Voluntary changes (재발행·자발적 변경) |
+| `(35)` | Nego (협상 운임) |
+| `(50)` | Rule application (규정 적용) |
+| `700` | All Paragraphs (전체 Category 조회) |
+
+<Tip title="자주 조회하는 Category">
+- **Cat 5** (Advance Purchase): 사전 구매 기한. 예: "출발 21일 전까지 구매 필수"
+- **Cat 6** (Minimum Stay): 최소 체류기간. 예: "현지 일요일 이후 귀국 가능"
+- **Cat 7** (Maximum Stay): 최대 체류기간. 예: "출발 후 1년 이내 귀국"
+- **Cat 16** (Penalties): 취소·변경 위약금. 예: "출발 전 취소 시 50% 위약금"
+- **Cat 31** (Reissue): 자발적 변경 조건. Cat 16와 함께 확인 필요
+</Tip>
+### Attribute Type 코드 (Mini Rules)
+
+`codedAttributesInfo.attributeType`에서 사용됩니다. 각 Category의 핵심 조건을 코드화합니다.
+
+**Cat 4 - Flight Application (적용 항공편)**
+
+| 코드 | 설명 |
+|------|------|
+| `AA` | BetweenAnd 표시자 |
+| `AB` | BetweenAnd 쌍의 수 |
+| `AC` | Between 첫 번째 지점 |
+| `AD` | Between 두 번째 지점 |
+| `AE` | And 첫 번째 지점 |
+| `AF` | And 두 번째 지점 |
+| `AG` | Via 표시자 |
+| `AI` | Via 경유지 목록 |
+| `AM` | Flight 표시자 |
+| `AO` | 적용 항공편 목록 |
+
+**Cat 5 - Advance Purchase (사전 구매)**
+
+| 코드 | 설명 |
+|------|------|
+| `BA` | 예약 허용 여부 |
+| `BB` | 예약 최초 가능 숫자 |
+| `BC` | 예약 최초 가능 기준 요일 |
+| `BD` | 예약 최초 가능 기간 |
+| `BE` | 예약 최초 가능 단위 |
+| `BF` | 예약 최후 가능 숫자 |
+| `BJ` | 발권 사전 기한 숫자 |
+| `BK` | 발권 사전 기한 기준 요일 |
+| `BL` | 발권 사전 기한 기간 |
+| `BM` | 발권 사전 기한 단위 |
+| `BN` | 구매 사전 기간 |
+| `BO` | 구매 사전 단위 |
+
+**Cat 2 - Day/Time (요일/시간)**
+
+| 코드 | 설명 |
+|------|------|
+| `CA` | 여행 허용 여부 |
+| `CB` | 적용 요일 |
+| `CC` | 귀국편 여행 허용 여부 |
+| `CD` | 귀국편 적용 요일 |
+| `CE` | 출국편 여행 허용 여부 |
+| `CF` | 출국편 적용 요일 |
+| `CAT` | 재발행 유형 (Cat 31/32 등) |
+
+**Cat 3 - Seasonability (시즌)**
+
+| 코드 | 설명 |
+|------|------|
+| `DA` | 시즌 날짜 쌍의 수 |
+| `DB` | 시즌 시작일 |
+| `DC` | 시즌 종료일 |
+
+**Cat 14 - Travel Restrictions (여행 제한)**
+
+| 코드 | 설명 |
+|------|------|
+| `EA` | 여행 날짜 쌍의 수 |
+| `EB` | 여행 시작일 |
+| `EC` | 여행 종료일 |
+
+**Cat 6 - Minimum Stay (최소 체류)**
+
+| 코드 | 설명 |
+|------|------|
+| `FA` | 최소 체류 숫자 |
+| `FB` | 최소 체류 기준 요일 |
+| `FC` | 최소 체류 기간 |
+| `FD` | 최소 체류 단위 |
+| `FE` | 최소 체류 기준일 |
+| `FF` | 빠른/늦은 시점 표시자 |
+
+**Cat 7 - Maximum Stay (최대 체류)**
+
+| 코드 | 설명 |
+|------|------|
+| `GA` | 최대 체류 숫자 |
+| `GB` | 최대 체류 기준 요일 |
+| `GC` | 최대 체류 기간 |
+| `GD` | 최대 체류 단위 |
+| `GE` | 최대 체류 기준일 |
+| `GF` | 빠른/늦은 시점 표시자 |
+
+**Cat 8 - Stopovers (경유)**
+
+| 코드 | 설명 |
+|------|------|
+| `HA` | 최대 경유 횟수 |
+| `HB` | 출국편 최대 경유 횟수 |
+| `HC` | 귀국편 최대 경유 횟수 |
+
+**Cat 9 - Transfers (환승)**
+
+| 코드 | 설명 |
+|------|------|
+| `IA` | 최대 환승 횟수 |
+| `IB` | 출국편 최대 환승 횟수 |
+| `IC` | 귀국편 최대 환승 횟수 |
+
+**Cat 19 - Children's Discount (소아 할인)**
+
+| 코드 | 설명 |
+|------|------|
+| `JA` | 할인 수 |
+| `JB` | 승객 유형 코드(PTC) |
+| `JC` | 최소 나이 |
+| `JD` | 최대 나이 |
+| `JE` | 할인율 (%) |
+| `JF` | 할인 금액 |
+| `JG` | 통화 코드 |
+
+**Cat 11 - Blackout Dates (블랙아웃)**
+
+| 코드 | 설명 |
+|------|------|
+| `KA` | 블랙아웃 날짜 쌍의 수 |
+| `KB` | 블랙아웃 시작일 |
+| `KC` | 블랙아웃 종료일 |
+
+**Cat 16 - Penalties (위약금)**
+
+| 코드 | 설명 |
+|------|------|
+| `LA` | 위약금 적용 시점 |
+| `LB` | 위약금 비율 (%) |
+| `LC` | 위약금 첫 번째 금액 |
+| `LD` | 위약금 첫 번째 통화 |
+| `LE` | 위약금 두 번째 금액 |
+| `LF` | 위약금 두 번째 통화 |
+| `LG` | 높은 금액 적용 표시자 |
+
+**Cat 31 - Voluntary Changes (자발적 변경)**
+
+| 코드 | 설명 |
+|------|------|
+| `MA` | 여정 변경 가능 여부 |
+| `MB` | Pricing Unit 변경 가능 여부 |
+| `MC` | Fare Component 변경 가능 여부 |
+| `MD` | 변경 수수료 첫 번째 금액 |
+| `ME` | 변경 수수료 첫 번째 통화 |
+| `MF` | 변경 수수료 두 번째 금액 |
+| `MG` | 변경 수수료 두 번째 통화 |
+| `MH` | 수수료 비율 (%) |
+| `MI` | 높은 금액 적용 표시자 |
+| `MJ` | 서비스 유형 |
+| `MK` | 환불 형태 |
+
+---
+
+### Message Function 코드
+
+`msgType.messageFunctionDetails.messageFunction` 필드에서 사용됩니다.
+
+| 코드 | 설명 |
+|------|------|
+| `711` | Fare Display by City Pair (구간별 운임 표시) |
+| `712` | Display Specific Fare Rules (특정 운임 규정 표시) |
+| `713` | Display Fare Routing Information (운임 경로 정보 표시) |
+| `714` | City Text Information (도시 텍스트 정보) |
+| `715` | Fare Mileage Display (운임 마일리지 표시) |
+| `716` | Secondary Mileage Display (보조 마일리지 표시) |
+| `717` | Mileage Calculation (마일리지 계산) |
+| `718` | MPM surcharge display (최대 허용 마일리지 할증 표시) |
+| `719` | Passenger Facilities Charge (공항 시설 이용료) |
+| `723` | Fare Tax Break Down (운임 세금 분류) |
+| `724` | Reservation Booking Designator Display (RBD 표시) |
+| `725` | Fare Construction Display (운임 구성 표시) |
+| `194` | Fare Quote Ladder (운임 견적 비교) |
+
+---
+
+### Global Direction 코드
+
+`fareCategories` 필드에서 사용됩니다. 운임이 적용되는 전 세계 방향성을 나타냅니다.
+
+| 코드 | 설명 |
+|------|------|
+| `7AT` | AT - 대서양 경유 (TC2/3 ↔ TC1) |
+| `7PA` | PA - 태평양 경유 (TC2/3 ↔ TC1) |
+| `7AP` | AP - 대서양·태평양 경유 (TC2 ↔ TC3) |
+| `7EH` | EH - 동반구 내 (TC2 & TC3, PO·TS 제외) |
+| `7WH` | WH - 서반구 내 (TC1) |
+| `7DO` | DO - 국내선 |
+| `7CT` | CT - 환승 여행 (원점 복귀, 대서양·태평양 이외) |
+| `7RW` | RW - 세계일주 (대서양·태평양 경유) |
+| `7CA` | CA - 캐나다 국내선 |
+| `7US` | US - 미국 국내선 |
+| `7TB` | TB - 접경 구간 |
+| `7TS` | TS - 시베리아 경유 (TC2 ↔ TC3) |
+| `7PO` | PO - 극지 경유 (TC2 ↔ TC3) |
+| `7EU` | EU - 유럽 경유 |
+| `7ME` | ME - 중동 경유 |
+| `7AF` | AF - 아프리카 경유 |
+
+---
+
+### Fare Qualifier (운임 한정자) 주요 코드
+
+`fareRouteInfo.fareQualifierDetails.fareQualifier` 필드에서 사용됩니다.
+
+| 코드 | 설명 |
+|------|------|
+| `700` | Add-on origin (가산 출발지 운임) |
+| `701` | Add-on destination (가산 목적지 운임) |
+| `702` | Advances purchase period (사전 구매 기간) |
+| `705` | (Base) fares without taxes (세전 기본 운임) |
+| `706` | (Base) fares with partial taxes (일부 세금 포함 운임) |
+| `707` | (Base) fares with taxes included (세금 포함 운임) |
+| `708` | Blackout (블랙아웃 적용) |
+| `709` | Cancellation fee details (취소 수수료 상세) |
+| `70A` | Base (기본 운임) |
+| `70B` | Total (총 운임) |
+| `70C` | No seasonal or blackout restrictions (시즌·블랙아웃 제한 없음) |
+| `70D` | Rule provisions vary by travel date (여행 날짜에 따라 규정 상이) |
+| `719` | Fare Cannot be used for Pricing (가격 산정 불가 운임) |
+| `724` | Fare is mileage based (마일리지 기반 운임) |
+| `725` | Fare is routing based (경로 기반 운임) |
+| `729` | Fares with a fixed penalty (고정 위약금 운임) |
+| `730` | Fares with no penalties (위약금 없는 운임) |
+| `731` | Fares with penalties (위약금 있는 운임) |
+| `732` | Fares with no advance purchase restrictions (사전 구매 제한 없음) |
+| `736` | Indicates fare is refundable (환불 가능 운임) |
+| `737` | Indicates no refund restriction (환불 제한 없음) |
+| `738` | Indicates no cancellation rules are held (취소 규정 없음) |
+| `740` | Indicates percentage of the fare that is non-refundable (비환불 비율) |
+| `741` | Indicates the fare is non-refundable (비환불 운임) |
+| `742` | Indicates the rule should be consulted (규정 확인 필요) |
+| `797` | Penalties applies (위약금 적용됨) |
+| `798` | Subject to cancellation/change penalty (취소·변경 위약금 대상) |
+| `799` | Tickets are non-refundable before departure (출발 전 환불 불가) |
+
+---
+
+### Price Type Qualifier 코드
+
+`pricingTickInfo.indicators` 필드에서 사용됩니다.
+
+| 코드 | 설명 |
+|------|------|
+| `RP` | Published fares (공시 운임) |
+| `RN` | Amadeus Nego Fares (아마데우스 협상 운임) |
+| `RU` | Unifares (통합 운임) |
+| `700` | Present credit card indicator (신용카드 제시 표시) |
+| `701` | Fare basis in fare calculation (운임 계산에서 Fare Basis 사용) |
+| `702` | Currency override (통화 강제 지정) |
+| `705` | No advance purchase (사전 구매 없이 조회) |
+| `706` | No maximum and minimum stay fares (최대·최소 체류 제한 없음) |
+| `707` | No minimum stay fares (최소 체류 제한 없음) |
+| `708` | No maximum stay fares (최대 체류 제한 없음) |
+| `709` | No penalty fares (위약금 없는 운임만 조회) |
+| `713` | Refundable fares (환불 가능 운임만 조회) |
+| `719` | Minimum stay (최소 체류 조건 포함 조회) |
+| `720` | Maximum stay (최대 체류 조건 포함 조회) |
+| `721` | Advance purchase (사전 구매 조건 포함 조회) |
+| `725` | Unsalable Fare (판매 불가 운임) |
+| `D` | Domestic itinerary (국내 여정) |
+| `I` | International itinerary (국제 여정) |
+| `NR` | Non refundable (환불 불가) |
+
+---
+
+### Text Subject Qualifier 코드
+
+`freeTextQualification.textSubjectQualifier` 필드에서 사용됩니다.
+
+| 코드 | 설명 |
+|------|------|
+| `3` | Fare rule text (운임 규정 텍스트) |
+| `4` | Fare routing (운임 경로 텍스트) |
+| `6` | Mileage information (마일리지 정보) |
+
+---
+
+### Application Error 코드 (주요)
+
+`errorInfo.rejectErrorCode.errorDetails.errorCode` 필드에서 사용됩니다.
+
+| 코드 | 설명 |
+|------|------|
+| `1` | Invalid date (유효하지 않은 날짜) |
+| `100` | Invalid Place of Departure Code (출발지 코드 오류) |
+| `101` | Invalid Place of Destination Code (목적지 코드 오류) |
+| `102` | Invalid Departure Date (출발일 오류) |
+| `104` | Invalid Reservation Booking Designator (RBD 오류) |
+| `107` | Invalid Airline Designator (항공사 코드 오류) |
+| `109` | Invalid Country Code (국가 코드 오류) |
+| `114` | Invalid Flight Number (편명 오류) |
+| `118` | System Unable to Process (시스템 처리 불가) |
+| `130` | Invalid Origin and Destination Pair (출발지·목적지 쌍 오류) |
+
+---
+
+## 6. Fare Rule 조회 흐름
+
+운임 규정 조회의 일반적인 흐름입니다.
+
+```
+1. Master Pricer 검색 → 운임 정보(Fare Basis, 항공사, 구간) 확인
+2. Fare_GetFareRules Query 구성
+   - transportInformation: 항공사 코드, 편명
+   - tripDescription: 출발지·목적지·날짜
+   - fare.detailsOfFare: Fare Basis 코드
+   - fareRule.tarifFareRule: 조회할 Category 번호 지정
+3. Reply 처리
+   - tariffInfo 반복: 각 Category별 규정 확인
+   - fareRuleText: 규정 전문 텍스트 표시
+   - codedAttributesInfo: Mini Rules 코드 파싱
+```
+
+<Warning title="Category 700 사용 시 주의">
+`ruleSectionId`에 `700`(All Paragraphs)을 지정하면 모든 Category 규정을 한 번에 조회합니다. 응답이 매우 클 수 있으므로 필요한 Category만 지정하는 것을 권장합니다.
+</Warning>
+---
+
+## 7. 약어 모음
+
+| 약어 | 풀네임 | 설명 |
+|------|--------|------|
+| AP | Advance Purchase | 사전 구매 기한 (Cat 5) |
+| ATPCO | Airline Tariff Publishing Company | 항공 운임 출판 회사. 운임 규정의 표준화를 담당 |
+| Cat | Category | ATPCO 규정 분류 번호 |
+| EH | Eastern Hemisphere | 동반구 (TC2 + TC3) |
+| Fare Basis | Fare Basis Code | 운임 기저 코드. 운임을 고유하게 식별하는 코드 (예: YLOWKR) |
+| FBC | Fare Basis Code | Fare Basis의 약어 |
+| GDS | Global Distribution System | 글로벌 항공 예약 시스템 |
+| GI | Global Indicator | 전 세계 방향성 코드 (예: AT, PA) |
+| MPM | Maximum Permitted Mileage | 최대 허용 마일리지 |
+| NUC | Neutral Unit of Construction | 운임 구성 중립 단위 (통화 중립 운임 계산 단위) |
+| ODI | Origin and Destination Information | 출발지·목적지 정보 |
+| OW | One Way | 편도 |
+| PFC | Passenger Facility Charge | 공항 시설 이용료 |
+| PTC | Passenger Type Code | 승객 유형 코드 (ADT=성인, CHD=소아, INF=유아) |
+| RBD | Reservation Booking Designator | 예약 등급 지시자 (예약 클래스 코드) |
+| RT | Round Trip | 왕복 |
+| TC1 | Traffic Conference Area 1 | IATA 지역 1 (아메리카) |
+| TC2 | Traffic Conference Area 2 | IATA 지역 2 (유럽·아프리카·중동) |
+| TC3 | Traffic Conference Area 3 | IATA 지역 3 (아시아·태평양) |
+| WH | Western Hemisphere | 서반구 (TC1) |
+
+---
+
+## 참고
+
+<CardGroup cols={2}>
+  <Card title="Master Pricer Travelboard Search" href="/search/master-pricer-travelboard-search" icon="link" />
+  <Card title="BSP 정산 가이드" href="/reference/bsp-settlement-guide" icon="link" />
+  <Card title="GDS 용어집" href="/reference/gds-terminology" icon="link" />
+</CardGroup>

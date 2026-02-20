@@ -1,0 +1,132 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Flight Tech Glossary",
+  "colors": {
+    "primary": "#1E40AF",
+    "light": "#3B82F6",
+    "dark": "#1E3A5F"
+  },
+  "favicon": "/favicon.svg",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "WBS Flow",
+        "groups": [
+          {
+            "group": "개요",
+            "pages": [
+              "index",
+              "amadeus-wbs-integration-flow"
+            ]
+          },
+          {
+            "group": "Step 1-2: 검색",
+            "icon": "magnifying-glass",
+            "pages": [
+              "search/fare-master-pricer-calendar",
+              "search/master-pricer-travelboard-search"
+            ]
+          },
+          {
+            "group": "Step 3-6: 가격 조회 및 규정",
+            "icon": "tag",
+            "pages": [
+              "pricing/fare-informative-best-pricing",
+              "pricing/fare-informative-pricing",
+              "pricing/fare-check-rules",
+              "pricing/minirule-get-from-rec"
+            ]
+          },
+          {
+            "group": "Step 7-9: 예약 생성",
+            "icon": "calendar-check",
+            "pages": [
+              "booking/air-sell-from-recommendation",
+              "booking/pnr-add-multi-elements",
+              "booking/fop-create-form-of-payment"
+            ]
+          },
+          {
+            "group": "Step 10-12: 발권",
+            "icon": "ticket",
+            "pages": [
+              "ticketing/fare-price-pnr-with-booking-class",
+              "ticketing/pnr-retrieve"
+            ]
+          },
+          {
+            "group": "Step 13-15: 후속 처리",
+            "icon": "clipboard-check",
+            "pages": [
+              "post-issuance/sales-reports",
+              "post-issuance/cancellation-flow"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "참고 자료",
+        "groups": [
+          {
+            "group": "용어 색인",
+            "icon": "book",
+            "pages": [
+              "glossary"
+            ]
+          },
+          {
+            "group": "기본 용어 및 가이드",
+            "icon": "graduation-cap",
+            "pages": [
+              "reference/gds-terminology",
+              "reference/bsp-settlement-guide"
+            ]
+          },
+          {
+            "group": "보조 API",
+            "icon": "puzzle-piece",
+            "pages": [
+              "reference/air-flightinfo",
+              "reference/fare-get-fare-rules"
+            ]
+          }
+        ]
+      }
+    ],
+    "global": {
+      "anchors": [
+        {
+          "anchor": "GitHub",
+          "href": "https://github.com/hooniis/mintlify-docs",
+          "icon": "github"
+        }
+      ]
+    }
+  },
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "GitHub",
+        "href": "https://github.com/hooniis/mintlify-docs"
+      }
+    ]
+  },
+  "contextual": {
+    "options": [
+      "copy",
+      "view",
+      "claude",
+      "chatgpt"
+    ]
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/hooniis/mintlify-docs"
+    }
+  }
+}
