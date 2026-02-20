@@ -1,8 +1,8 @@
-site_name: Travel Tech Glossary
-site_description: 항공·여행 기술 용어 사전
-site_url: https://sunghoonLee.github.io/travel-tech-glossary/
-repo_url: https://github.com/sunghoonLee/travel-tech-glossary
-repo_name: sunghoonLee/travel-tech-glossary
+site_name: Flight Tech Glossary
+site_description: 항공 기술 용어 사전
+site_url: https://sunghoonLee.github.io/flight-tech-glossary/
+repo_url: https://github.com/sunghoonLee/flight-tech-glossary
+repo_name: sunghoonLee/flight-tech-glossary
 
 theme:
   name: material

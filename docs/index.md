@@ -1,6 +1,6 @@
-# Travel Tech Glossary
+# Flight Tech Glossary
 
-항공 및 여행 기술 도메인의 용어를 정리하는 사전입니다.
+항공 기술 도메인의 용어를 정리하는 사전입니다.
 
 ---
 
