@@ -2,7 +2,7 @@
 
 항공 기술 도메인의 용어를 정리하는 사전입니다.
 
-https://sunghoonlee.github.io/flight-tech-glossary/
+https://sunghoonlee.mintlify.app/
 
 ## 카테고리
 
@@ -68,47 +68,7 @@ WBS Integration Flow — IBE 예약 전체 플로우 가이드 (검색→발권�
 |---------|------|
 | 용어 색인 | 전체 용어 알파벳순 색인 (A-Z) |
 
-## 용어 추가 방법
-
-1. `docs/` 폴더에 새 `.md` 파일을 추가하거나 기존 파일을 편집합니다.
-2. `mkdocs.yml`의 `nav` 섹션에 새 문서를 등록합니다.
-3. `main` 브랜치에 push하면 GitHub Actions가 자동으로 사이트를 빌드·배포합니다.
-
-```
-docs/
-├── index.md                            # 홈
-├── gds-terminology.md                  # [공통] GDS 용어집
-├── bsp-settlement-guide.md             # [공통] BSP 정산 가이드
-├── amadeus-wbs-integration-flow.md     # [Amadeus] WBS Integration Flow
-├── fare-master-pricer-calendar.md      # [검색] Fare_MasterPricerCalendar
-├── master-pricer-travelboard-search.md # [검색] Fare_MasterPricerTravelBoardSearch
-├── fare-informative-best-pricing.md    # [가격/규정] Fare_InformativeBestPricing
-├── fare-informative-pricing.md         # [가격/규정] Fare_InformativePricing
-├── fare-check-rules.md                 # [가격/규정] Fare_CheckRules
-├── fare-get-fare-rules.md              # [가격/규정] Fare_GetFareRules
-├── minirule-get-from-rec.md            # [가격/규정] MiniRule_GetFromRec
-├── air-sell-from-recommendation.md     # [예약] Air_SellFromRecommendation
-├── pnr-add-multi-elements.md           # [예약] PNR_AddMultiElements
-├── fop-create-form-of-payment.md       # [예약] FOP_CreateFormOfPayment
-├── fare-price-pnr-with-booking-class.md # [발권] Fare_PricePNRWithBookingClass
-├── pnr-retrieve.md                     # [발권] PNR_Retrieve
-├── sales-reports.md                    # [후속] SalesReports
-├── cancellation-flow.md                # [후속] Cancellation Flow
-├── air-flightinfo.md                   # [기타] Air FlightInfo
-├── glossary.md                         # 용어 색인
-└── (새 문서).md                         # 새 카테고리 추가
-```
-
-## 로컬 개발
-
-```bash
-pip install mkdocs mkdocs-material
-mkdocs serve
-```
-
-http://127.0.0.1:8000 에서 미리보기가 가능합니다.
-
 ## 기술 스택
 
-- [MkDocs](https://www.mkdocs.org/) + [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/)
-- GitHub Actions → GitHub Pages 자동 배포
+- [Mintlify](https://mintlify.com/) 기반 문서 사이트
+- GitHub 연동 자동 배포
