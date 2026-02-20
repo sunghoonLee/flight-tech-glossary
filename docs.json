@@ -98,7 +98,7 @@
       "anchors": [
         {
           "anchor": "GitHub",
-          "href": "https://github.com/hooniis/mintlify-docs",
+          "href": "https://github.com/sunghoonLee/flight-tech-glossary",
           "icon": "github"
         }
       ]
@@ -112,7 +112,7 @@
     "links": [
       {
         "label": "GitHub",
-        "href": "https://github.com/hooniis/mintlify-docs"
+        "href": "https://github.com/sunghoonLee/flight-tech-glossary"
       }
     ]
   },
@@ -126,7 +126,7 @@
   },
   "footer": {
     "socials": {
-      "github": "https://github.com/hooniis/mintlify-docs"
+      "github": "https://github.com/sunghoonLee/flight-tech-glossary"
     }
   }
 }
