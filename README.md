@@ -17,6 +17,7 @@ https://sunghoonlee.github.io/flight-tech-glossary/
 
 | 카테고리 | 설명 | 주요 키워드 |
 |---------|------|------------|
+| WBS Integration Flow | IBE 예약 전체 플로우 가이드 (검색→발권→정산→취소) | Calendar, TravelBoard, TST, FOP, SalesReports, Carbon |
 | Master Pricer Travelboard Search | 항공편 검색 + 최저가 운임 조회 API | MPTBS, Recommendation, Fare Family, Mini Rules |
 | Air FlightInfo | 항공편 정보 조회 API | FLIFO, Marriage Segment, Equipment, Meal Service |
 | Air SellFromRecommendation | 검색 결과 기반 예약 생성 API | Segment Status, Marriage, Itinerary |
@@ -41,6 +42,7 @@ docs/
 ├── index.md                            # 홈
 ├── gds-terminology.md                  # [공통] GDS 용어집
 ├── bsp-settlement-guide.md             # [공통] BSP 정산 가이드
+├── amadeus-wbs-integration-flow.md     # [Amadeus] WBS Integration Flow
 ├── master-pricer-travelboard-search.md # [Amadeus] MPTBS 용어
 ├── air-flightinfo.md                   # [Amadeus] Air FlightInfo 용어
 ├── air-sell-from-recommendation.md     # [Amadeus] Air SellFromRecommendation 용어

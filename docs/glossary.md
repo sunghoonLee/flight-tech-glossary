@@ -46,6 +46,15 @@
 
 ## C
 
+**Carbon Footprint** (탄소 배출량)
+:   항공편 운항으로 발생하는 CO2 배출 추정치. ICAO 또는 Travalyst(TVYS) 방법론으로 계산. MasterPricer에서 `carbonEmissionBySourceDetails` 추가로 조회 가능. → [WBS Integration Flow](amadeus-wbs-integration-flow.md)
+
+**CTCE** (Contact Email)
+:   IATA Mandate 830d에 따른 승객 이메일 SSR. `@`→`//`, `_`→`..` 변환 규칙 적용. → [WBS Integration Flow](amadeus-wbs-integration-flow.md)
+
+**CTCM** (Contact Mobile)
+:   IATA Mandate 830d에 따른 승객 휴대전화 SSR. 국가코드/국가ISO 형식. → [WBS Integration Flow](amadeus-wbs-integration-flow.md)
+
 **Cert Mode** (Certification Mode)
 :   Sabre 시스템 연동 시 테스트/인증 환경. → [Sabre 용어](gds-terminology.md#3-sabre-용어)
 
@@ -91,6 +100,18 @@
 
 ## F
 
+**Fare_InformativeBestPricingWithoutPNR**
+:   Amadeus API. PNR 없이 여정과 승객 정보만으로 최적 운임을 자동 계산(Best Pricer). → [WBS Integration Flow](amadeus-wbs-integration-flow.md#step-3-fare_informativebestpricingwithoutpnr)
+
+**Fare_InformativePricingWithoutPNR**
+:   Amadeus API. PNR 없이 특정 운임을 확정 조회. `uniqueOfferReference`를 반환하여 규정 조회·발권에 활용. → [WBS Integration Flow](amadeus-wbs-integration-flow.md#step-4-fare_informativepricingwithoutpnr)
+
+**Fare_MasterPricerCalendar**
+:   Amadeus API. 기준 날짜 전후 범위의 최저가를 달력 형태로 탐색. → [WBS Integration Flow](amadeus-wbs-integration-flow.md#step-1-fare_masterpricercalendar)
+
+**Fare_PricePNRWithBookingClass**
+:   Amadeus API. PNR 세그먼트 기반 운임 계산 후 TST(Transitional Stored Ticket) 생성. 발권 직전 운임 확정 단계. → [WBS Integration Flow](amadeus-wbs-integration-flow.md#step-10-fare_pricepnrwithbookingclass)
+
 **FLIFO** (Flight Information)
 :   항공편의 실시간 운항 정보. 게이트 변경, 지연/결항, 실제 출발/도착 시간 등 제공. → [Air FlightInfo](air-flightinfo.md#6-flifo-flight-information)
 
@@ -107,7 +128,13 @@
 :   항공사가 부가서비스 포함 여부에 따라 운임을 등급화한 상품 체계. 예: LIGHT, STANDARD, FLEX. → [MPTBS](master-pricer-travelboard-search.md#5-fare-family-브랜드-운임)
 
 **FOP** (Form of Payment)
-:   결제 수단. 현금, 신용카드, 마일리지 등 항공권 결제에 사용되는 지불 방식. → [MPTBS](master-pricer-travelboard-search.md#약어-모음), [PNR AddMultiElements](pnr-add-multi-elements.md)
+:   결제 수단. 현금, 신용카드, 마일리지 등 항공권 결제에 사용되는 지불 방식. → [MPTBS](master-pricer-travelboard-search.md#약어-모음), [PNR AddMultiElements](pnr-add-multi-elements.md), [WBS Integration Flow](amadeus-wbs-integration-flow.md)
+
+**FOP_CreateFormOfPayment**
+:   Amadeus API. PNR에 결제 수단을 등록. 카드 정보를 FortKnox에 토큰화 저장. 발권 전 필수 단계. → [WBS Integration Flow](amadeus-wbs-integration-flow.md#step-9-fop_createformofpayment)
+
+**FortKnox**
+:   Amadeus 내부 보안 카드 정보 저장소. 카드 번호를 NOX 토큰으로 대체하여 PCI-DSS 준수. → [WBS Integration Flow](amadeus-wbs-integration-flow.md#step-9-fop_createformofpayment)
 
 ## G
 
@@ -144,6 +171,9 @@
 
 ## L
 
+**Last Ticketing Date** (발권 마감일)
+:   TST에 기록된 운임으로 발권 가능한 최종 기한. 초과 시 TST 만료, 재운임 계산 필요. → [WBS Integration Flow](amadeus-wbs-integration-flow.md#step-10-fare_pricepnrwithbookingclass)
+
 **LSA** (Last Seat Available)
 :   마지막 남은 좌석에서도 해당 운임으로 예약 가능한지 여부. → [MPTBS](master-pricer-travelboard-search.md#10-기타-주요-용어)
 
@@ -168,6 +198,9 @@
 :   Amadeus GDS의 항공편 검색 + 최저가 운임 조회 API. → [MPTBS](master-pricer-travelboard-search.md#1-개요)
 
 ## N
+
+**NUC** (Neutral Unit of Construction)
+:   IATA 운임 계산 기준 통화. 국제선 운임 계산 시 각국 통화를 NUC로 환산 후 합산하여 최종 통화로 변환. → [WBS Integration Flow](amadeus-wbs-integration-flow.md#step-2-fare_masterpricertravelboardsearch)
 
 **NDC** (New Distribution Capability)
 :   IATA가 만든 항공사-여행사 간 직접 연결 표준. GDS 중개 없이 API 직접 연결. → [NDC](bsp-settlement-guide.md#14-ndc-new-distribution-capability)
@@ -257,6 +290,9 @@
 
 ## S
 
+**SalesReports_DisplayQueryReport**
+:   Amadeus API. 오피스 판매 실적 보고서 조회. AlternativeCurrency(외화) 또는 DFC(기본 통화) 모드 지원. → [WBS Integration Flow](amadeus-wbs-integration-flow.md#step-13-salesreports-alternativecurrency)
+
 **Segment Status** (구간 상태 코드)
 :   항공편 구간의 예약 상태. HK=확약, NN=요청중, UC=좌석불가, WL=대기. → [Air SellFromRecommendation](air-sell-from-recommendation.md), [PNR AddMultiElements](pnr-add-multi-elements.md)
 
@@ -283,8 +319,14 @@
 **TKT** (Ticket)
 :   발권된 항공권. BSP를 통해 정산. → [핵심 문서/전표](bsp-settlement-guide.md#4-핵심-문서전표)
 
+**Ticket_CancelDocument**
+:   Amadeus API. 발행된 전자항공권을 취소. PNR_Cancel 전에 반드시 먼저 호출해야 하며, 티켓 수만큼 개별 호출 필요. → [WBS Integration Flow](amadeus-wbs-integration-flow.md#step-15-cancellation-flow)
+
 **TST** (Transitional Stored Ticket)
-:   Amadeus에서 운임 계산 결과를 PNR에 저장하는 레코드. 발권 전 운임 정보 보관. → [PNR Retrieve](pnr-retrieve.md)
+:   Amadeus에서 운임 계산 결과를 PNR에 저장하는 레코드. 발권 전 운임 정보 보관. 승객 유형별(ADT/CHD/INF) 각각 생성. → [PNR Retrieve](pnr-retrieve.md), [WBS Integration Flow](amadeus-wbs-integration-flow.md#step-10-fare_pricepnrwithbookingclass)
+
+**TTP** (Ticket Transaction Processing)
+:   Amadeus 발권 처리 명령. TST 기반으로 전자항공권 발행. 실행 시 FOP의 카드 승인이 함께 처리됨. → [WBS Integration Flow](amadeus-wbs-integration-flow.md#step-12-pnr_retrieve-post-issuance)
 
 **Tech Stop** (기술 착륙)
 :   여객 탑승/하차 없이 연료 보급 등 목적으로 경유하는 공항. → [MPTBS](master-pricer-travelboard-search.md#10-기타-주요-용어)

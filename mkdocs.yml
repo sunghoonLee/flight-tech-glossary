@@ -61,6 +61,7 @@ nav:
     - GDS 용어집: gds-terminology.md
     - BSP 정산 가이드: bsp-settlement-guide.md
   - Amadeus:
+    - WBS Integration Flow: amadeus-wbs-integration-flow.md
     - Master Pricer Travelboard Search: master-pricer-travelboard-search.md
     - Air FlightInfo: air-flightinfo.md
     - Air SellFromRecommendation: air-sell-from-recommendation.md
