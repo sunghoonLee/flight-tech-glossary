@@ -1,0 +1,587 @@
+---
+title: "Mars 코드 컨벤션 용어집"
+description: "Mars 프로젝트 코드베이스 기반 항공 도메인 용어집. 신규 개발 시 네이밍 컨벤션으로 활용합니다."
+---
+
+Mars 프로젝트 코드베이스 기반으로 정리한 항공 도메인 용어집입니다.
+신규 개발 시 네이밍 컨벤션으로 활용합니다.
+
+---
+
+## 구간 (Route)
+
+| code | description | type | 비고 |
+|------|-------------|------|------|
+| `operationScope` | 국내선/국제선 구분 | `OperationScope` | `DOMESTIC("D", "국내선")`, `INTERNATIONAL("I", "국제선")` |
+| `tripType` | 여정 유형 | `TripType` | `ONE_WAY("OW", "편도")`, `ROUND_TRIP("RT", "왕복")`, `MULTI_CITY("MT", "다구간")` |
+| `oneWay` | 편도 | | TripType.ONE_WAY |
+| `roundTrip` | 왕복 | | TripType.ROUND_TRIP |
+| `multiCity` | 다구간 | | TripType.MULTI_CITY |
+| `domestic` | 국내선 | | OperationScope.DOMESTIC |
+| `international` | 국제선 | | OperationScope.INTERNATIONAL |
+| `direct` | 직항 여부 | `Boolean` | 경유 없이 직항인지 여부 |
+
+---
+
+## 공항 (Airport)
+
+| code | description | type | 비고 |
+|------|-------------|------|------|
+| `airport` | 공항 | | 공항 엔티티 또는 코드 |
+| `iata` | IATA 공항 코드 | `String` | 3자리 코드 (예: ICN, NRT) |
+| `icao` | ICAO 공항 코드 | `String` | 4자리 코드 (예: RKSI) |
+| `city` | 도시 코드 | `String` | IATA 도시 코드 (예: SEL) |
+| `cityName` | 도시명 (영문) | `String` | |
+| `cityKoreanName` | 도시명 (한글) | `String` | |
+| `country` | 국가 코드 | `String` | ISO 국가 코드 |
+| `countryName` | 국가명 (영문) | `String` | |
+| `countryKoreanName` | 국가명 (한글) | `String` | |
+| `state` | 주 | `String` | 미국 등 주(state) 단위 |
+| `terminal` | 터미널 | `String` | 공항 터미널 번호/이름 |
+| `timezone` | 타임존 | `String` | IANA 타임존 (예: Asia/Seoul) |
+| `utcOffset` | UTC 오프셋 | `String` | UTC 기준 시차 |
+| `latitude` | 위도 | `Double` | |
+| `longitude` | 경도 | `Double` | |
+| `origin` | 출발 공항 | `String` | 출발지 IATA 코드 |
+| `destination` | 도착 공항 | `String` | 목적지 IATA 코드 |
+| `departure` | 출발 | | 출발 정보 (FlightEndPoint) |
+| `arrival` | 도착 | | 도착 정보 (FlightEndPoint) |
+| `departureAt` | 출발 일시 | `LocalDateTime` | |
+| `arrivalAt` | 도착 일시 | `LocalDateTime` | |
+| `departureDate` | 출발 일 | `LocalDate` | |
+| `departureTime` | 출발 시간 | `LocalTime` | |
+| `arrivalDate` | 도착 일 | `LocalDate` | |
+| `arrivalTime` | 도착 시간 | `LocalTime` | |
+| `departureAirport` | 출발 공항 코드 | `String` | |
+| `arrivalAirport` | 도착 공항 코드 | `String` | |
+| `departureCity` | 출발 도시 코드 | `String` | |
+| `arrivalCity` | 도착 도시 코드 | `String` | |
+| `departureTerminal` | 출발 터미널 | `String` | |
+| `arrivalTerminal` | 도착 터미널 | `String` | |
+| `returnAt` | 귀국 일시 | `LocalDateTime` | 왕복 여정의 돌아오는 출발 일시 |
+
+---
+
+## 항공사 (Airline)
+
+| code | description | type | 비고 |
+|------|-------------|------|------|
+| `airline` | 항공사 코드 | `String` | IATA 2자리 코드 (예: KE, OZ) |
+| `threeDigitCode` | 항공사 3자리 숫자 코드 | `String` | IATA 숫자 코드 (예: 180) |
+| `name` | 항공사명 (영문) | `String` | |
+| `koreanName` | 항공사명 (한글) | `String` | |
+| `airlineAllianceCode` | 항공사 동맹 코드 | `String` | Star Alliance, Oneworld 등 |
+| `marketingAirline` | 마케팅 항공사 코드 | `String` | 판매(예약) 항공사. `sale_air_cd` |
+| `operatingAirline` | 운항 항공사 코드 | `String` | 실제 비행하는 항공사. `flt_air_cd` |
+| `codeShareAirline` | 공동 운항 항공사 코드 | `String` | 코드쉐어 파트너 |
+| `flightNo` | 편명 (항공편 번호) | `String` | 항공사 코드 포함 가능 (예: KE001) |
+| `aircraft` | 기종 | `String` | 항공기 기종 코드 (예: B738, A321) |
+
+---
+
+## 여정 (Itinerary)
+
+| code | description | type | 비고 |
+|------|-------------|------|------|
+| `itinerary` | 여정 | | 출발지→도착지 단위 경로 묶음 |
+| `itineraryNo` | 여정 번호 | `String` | 여정 묶음 단위 식별자. `itin_bundle_unit` |
+| `segment` | 구간 | | 단일 항공편 (1개의 비행) |
+| `segmentNo` | 구간 번호 | `int` | 구간 순서 번호. `itin_no` |
+| `duration` | 소요 시간 | `String` | 비행 또는 여정 소요 시간 |
+| `numberOfStops` | 경유 횟수 | `int` | 중간 기착 횟수 |
+| `stops` | 경유지 목록 | `List` | 중간 기착 공항 정보 |
+| `isTransfer` | 환승 여부 | `boolean` | 경유/환승 유무. `trnst_yn` |
+| `transferAirport` | 환승 공항 | `String` | 환승 공항 코드. `trnst_airport_cd` |
+| `isDestination` | 최종 목적지 여부 | `boolean` | `dstn_yn` |
+| `tripRouteContent` | 전체 여정 내용 | `String` | 전체 경로 문자열. `all_itin_content` |
+| `codeShareContent` | 코드쉐어 내용 | `String` | 공동 운항 정보. `cdshare_content` |
+| `segmentTatooNo` | 세그먼트 타투 번호 | `String` | GDS 세그먼트 식별자 |
+
+---
+
+## 승객 (Traveler)
+
+| code | description | type | 비고 |
+|------|-------------|------|------|
+| `traveler` | 탑승자 | | 주문/예약 내 여행자 정보 |
+| `travelerType` | 탑승자 유형 | `TravelerType` | `ADULT("ADT", "성인")`, `CHILD("CHD", "소아")`, `INFANT("INF", "유아")` |
+| `adult` | 성인 | | 만 12세 이상 |
+| `child` | 소아 | | 만 2세 이상 ~ 만 12세 미만 |
+| `infant` | 유아 | | 만 2세 미만 |
+| `pax` | 승객 (Passenger) | | 항공 업계 표준 약어 |
+| `paxCount` | 승객 수 | `int` | |
+| `adults` | 성인 수 | `int` | 검색/예약 요청 시 사용 |
+| `children` | 소아 수 | `int` | |
+| `infants` | 유아 수 | `int` | |
+| `gender` | 성별 | `Gender` | `MALE("M")`, `FEMALE("F")`, `UNSPECIFIED("U")` |
+| `nationality` | 국적 | `String` | 국가 코드 |
+| `birthDate` | 생년월일 | `LocalDate` | |
+| `passengerNo` | 승객 번호 | `int` | 주문 내 승객 순번. `pax_no` |
+| `passengerId` | 승객 ID | `String` | `pax_id` |
+| `parentPassengerNo` | 부모 승객 번호 | `Integer` | 유아의 동반 성인. `parnts_pax_no` |
+| `hasInfant` | 유아 동반 여부 | `boolean` | `pax_inf_acmpny_yn` |
+| `passengerTitle` | 승객 호칭 | `String` | Mr./Mrs./Ms. 등. `pax_eng_title` |
+| `koreanName` | 한국어 이름 | `String` | `pax_kor_nm` |
+| `reservationCount` | 예약 인원 수 | `Integer` | `rsv_inwon` |
+
+---
+
+## 등급 (Cabin)
+
+| code | description | type | 비고 |
+|------|-------------|------|------|
+| `cabinClass` | 좌석 등급 (운송/탑승 등급) | `CabinClass` | 실제 탑승하는 좌석 등급 |
+| `economy` | 이코노미석 | | CabinClass.ECONOMY |
+| `premiumEconomy` | 프리미엄 이코노미석 | | CabinClass.PREMIUM_ECONOMY |
+| `businessClass` | 비즈니스석 | | CabinClass.BUSINESS |
+| `firstClass` | 일등석 | | CabinClass.FIRST |
+| `bookingClass` | 예약 등급 (Booking Class) | `String` | 운임 좌석 클래스 코드 (Y, B, M, H 등). `rsv_seat_grad` |
+
+### Cabin Class → Booking Class 코드 매핑
+
+| cabinClass | bookingClass 코드 | 설명 |
+|------------|-------------------|------|
+| `FIRST` | F, A, P | 일등석 계열 |
+| `BUSINESS` | J, C, D, I, Z | 비즈니스석 계열 |
+| `PREMIUM_ECONOMY` | W, E, R | 프리미엄 이코노미석 계열 |
+| `ECONOMY` | Y, B, M, H, K, L, Q, T, N, V, X, G, S, O, U | 이코노미석 계열 (Y=Full Fare 기준) |
+
+<Note>
+**cabinClass vs bookingClass**: `cabinClass`는 실제 좌석 유형(이코노미, 비즈니스 등)이고, `bookingClass`는 항공사 운임 인벤토리 버킷(Y, B, M 등)입니다. 같은 이코노미석이라도 bookingClass에 따라 가격·환불·변경 조건이 다릅니다.
+</Note>
+
+---
+
+## 예약 (Reservation)
+
+| code | description | type | 비고 |
+|------|-------------|------|------|
+| `reservation` | 예약 | | 항공편 예약 건 |
+| `reservationNo` | 예약 번호 | `String` | 시스템 예약 번호. `rsv_no` |
+| `orderId` | 주문 ID (PNR 일련번호) | `Long` | DB 기준 예약 식별자. `pnr_seqno` |
+| `alphaPnr` | 알파 PNR | `String` | GDS PNR 코드. `alpha_pnr_no` |
+| `airlineReservationNo` | 항공사 예약 번호 | `String` | 항공사 자체 예약 번호. `air_rsv_no` |
+| `reservationStatus` | 예약 상태 | `ReservationStatus` | 아래 상태 코드 참조 |
+| `reservedAt` | 예약 일시 | `LocalDateTime` | `rsv_dtm` |
+| `confirmKey` | 확인 키 | `String` | 운임 확인 후 발급되는 키 |
+| `orderKey` | 주문 키 | `String` | 주문 고유 식별 키 |
+| `gdsCode` | GDS 코드 | `String` | GDS 시스템 코드 |
+| `cancel` | 취소 | | 예약 취소 |
+| `cancelled` | 취소 여부 | `boolean` | `cancel_yn` |
+| `cancelledAt` | 취소 일시 | `LocalDateTime` | `cancel_dtm` |
+| `superReservationNo` | 시리즈 예약 번호 | `String` | 묶음 예약. `super_rsv_no` |
+| `isNdcReservation` | NDC 예약 여부 | `boolean` | NDC(New Distribution Capability) 채널. `ndc_rsv_yn` |
+| `ndcOrderId` | NDC 주문 ID | `String` | `ndc_ordr_id` |
+| `pcc` | PCC | `String` | Point of Sale Control 코드 |
+
+---
+
+## 운임 (Fare)
+
+| code | description | type | 비고 |
+|------|-------------|------|------|
+| `fare` | 운임 | | 항공편 가격 정보 전체 |
+| `fareSource` | 운임 소스 | `FareSource` | `AMADEUS`, `JEJU_AIR`, `TWAY_AIR`, `ONEFLY` |
+| `fareBasis` | 운임 기반 코드 (Fare Basis) | `String` | 운임 규정 식별 코드. 구간·승객 유형별로 다름 |
+| `farePrice` | 운임 가격 | `long` | 항공 운임 금액 |
+| `confirmedFare` | 확정된 운임 여부 | `boolean` | `confirmed_fare` |
+| `travelerPricing` | 승객별 가격 | | 승객 유형별 상세 가격 정보 |
+| `fareDetailsBySegment` | 구간별 운임 상세 | | 구간별 cabinClass, bookingClass, 수하물 등 |
+| `pricingOptions` | 가격 옵션 | | 환불 가능, 변경 가능 등 운임 옵션 |
+| `refundableFare` | 환불 가능 운임 | `Boolean` | |
+| `noRestrictionFare` | 제한 없는 운임 | `Boolean` | |
+| `noPenaltyFare` | 위약금 없는 운임 | `Boolean` | |
+| `regulationCode` | 규정 코드 | `String` | 운임 규정 식별 코드 |
+| `cacheKey` | 캐시 키 | `String` | 운임 캐시 식별자 |
+| `segmentFareType` | 구간 운임 유형 | `String` | `seg_fare_type` |
+
+---
+
+## 금액 (Price)
+
+| code | description | type | 비고 |
+|------|-------------|------|------|
+| `price` | 가격 | | Price 객체 |
+| `amount` | 금액 | `long` | |
+| `currency` | 통화 | `String` | KRW, USD 등 |
+| `net` | 항공사 운임 (Net) | `long` | 순수 항공 운임. `sale_net_amt` |
+| `tax` | 제세공과금 | `long` | TAX. `sale_tax_amt` |
+| `fuelSurcharge` | 유류 할증료 | `long` | BAF(Bunker Adjustment Factor). `baf` |
+| `tasf` | 발권 수수료 (TASF) | `long` | Ticketing Agency Service Fee |
+| `discount` | 할인 금액 | `long` | `sale_dscnt_amt` |
+| `finalPrice` | 최종 판매가 | `long` | 할인 적용 후 최종 금액. `sale_tot_amt` |
+| `saleTotalAmount` | 총 금액 | `long` | `sale_tot_amt` |
+| `grandTotal` | 총 결제 금액 | | 모든 비용 합산 |
+| `fees` | 수수료 목록 | `List<Fee>` | |
+| `taxes` | 세금 목록 | `List<Tax>` | |
+| `iataFare` | IATA 운임 | `long` | IATA 기준 운임 |
+| `mspFare` | MSP 운임 | `long` | |
+| `qChargeAmount` | Q Charge | `long` | Q 수수료. `sale_que_amt` |
+| `saleUpAmount` | 업셀 추가 금액 | `long` | `sale_up_amt` |
+| `upsellAdditionalAmount` | 업셀 추가 금액 | `long` | `upsell_add_amt` |
+| `hiddenNetAmount` | 히든 순 금액 | `long` | `hidden_sale_net_amt` |
+| `hiddenTaxAmount` | 히든 세금 금액 | `long` | `hidden_sale_tax_amt` |
+
+### TaxCode (세금 유형)
+
+| code | description |
+|------|-------------|
+| `TAX` | 제세공과금 |
+| `FUEL` | 유류 할증료 |
+| `OTHER` | 기타 수수료 |
+
+### FeeType (수수료 유형)
+
+| code | description |
+|------|-------------|
+| `TICKETING` | 티케팅 수수료 |
+| `FORM_OF_PAYMENT` | 결제 수수료 |
+| `SUPPLIER` | 공급처 수수료 |
+
+---
+
+## 결제 (Payment)
+
+| code | description | type | 비고 |
+|------|-------------|------|------|
+| `pay` | 결제 | | |
+| `payStatus` | 결제 상태 | `PayStatus` | 아래 상태 코드 참조 |
+| `paymentType` | 결제 방법 구분 | | 카드, 현금 등 |
+| `paymentMethodFlag` | 결제 수단 코드 | `String` | `pay_mth_flag` |
+| `payTimeLimit` | 결제 마감 시한 | `LocalDateTime` | `pay_tl` |
+| `card` | 카드 | | 카드 결제 |
+| `cash` | 현금 | | 현금 결제 |
+| `cardPayAmount` | 카드 결제 금액 | `long` | `card_pay_amt` |
+| `cashPayAmount` | 현금 결제 금액 | `long` | `cash_pay_amt` |
+| `cardNo` | 카드 번호 | `String` | (암호화) |
+| `cardCode` | 카드 코드 | `String` | 카드사 코드 |
+| `cardConfirmNo` | 카드 승인 번호 | `String` | |
+| `cardInstallmentMonths` | 카드 할부 개월 수 | `String` | `card_instlmt_cnt` |
+| `isCorporateCard` | 법인 카드 여부 | `Boolean` | |
+| `easyPaymentType` | 간편결제 유형 | `EasyPaymentType` | `NAVER_PAY("네이버 페이")` |
+| `tasfPayStatus` | TASF 결제 상태 | `PayStatus` | TASF 별도 결제 상태. `tasf_pay_status_cd` |
+| `isTasfPaySeparately` | TASF 별도 결제 여부 | `boolean` | `tasf_pay_xtr_yn` |
+| `isMrtPayment` | MRT 결제 여부 | `boolean` | `mrt_payment_yn` |
+
+---
+
+## 발권 (Ticketing)
+
+| code | description | type | 비고 |
+|------|-------------|------|------|
+| `issue` | 발권 | | 티켓 발행 행위 |
+| `issueStatus` | 발권 상태 | `IssueStatus` | 아래 상태 코드 참조 |
+| `issueDate` | 발권 일 | `LocalDate` | `issue_date` |
+| `ticket` | 항공권 | | Ticket 엔티티 |
+| `ticketNo` | 항공권 번호 | `String` | `tkt_no` |
+| `connectionTicketNo` | 접속 항공권 번호 | `String` | 연결 발권. `conj_tkt_no` |
+| `originalTicketNo` | 원래 항공권 번호 | `String` | 재발행 전 원본. `orgin_tkt_no` |
+| `reissueFlag` | 재발행 여부 | `String` | `reisue_flag` |
+| `reissueTicketNo` | 재발행 항공권 번호 | `String` | `reisue_tkt_no` |
+| `reissueFee` | 재발행 수수료 | `long` | `reisue_fee` |
+| `voidFlag` | VOID 여부 | `String` | 발권 무효화 |
+| `endorseContent` | 배서 내용 | `String` | 항공권 제한 조건. `endorse_content` |
+| `fareCalculationContent` | 운임 계산 내용 | `String` | `fare_calc_content` |
+| `airlineIssueTimeLimit` | 항공사 발권 시한 | `LocalDateTime` | `air_ttl` |
+| `lastTicketingDate` | 최종 발권 기한 | | |
+| `isApisRegistered` | APIS 등록 여부 | `boolean` | Advance Passenger Information System. `apis_reg_yn` |
+| `isDsr` | DSR 여부 | `boolean` | `dsr_yn` |
+| `bspNetAmount` | BSP 순 금액 | `long` | BSP(Bank Settlement Plan) 정산 금액 |
+
+### TravelDocumentType (발권 문서 유형)
+
+| code | description |
+|------|-------------|
+| `E_TICKET` | 전자 항공권 |
+| `P_TICKET` | 종이 항공권 |
+| `EMD` | EMD (Electronic Miscellaneous Document) |
+
+### TravelDocumentStatus (발권 문서 상태)
+
+| code | description |
+|------|-------------|
+| `ISSUED` | 발행됨 |
+| `REFUNDED` | 환불됨 |
+| `VOID` | 무효화됨 |
+| `ORIGINAL` | 원본 |
+| `EXCHANGED` | 교환됨 (재발행) |
+| `NO_STATUS` | 상태 없음 |
+
+---
+
+## 환불 (Refund)
+
+| code | description | type | 비고 |
+|------|-------------|------|------|
+| `refundStatus` | 환불 상태 | `enum` | `refund_status_cd` |
+| `refundAmount` | 환불 금액 | `long` | `refund_amt` |
+| `refundFare` | 환불 운임 | `long` | `refund_fare` |
+| `usedFare` | 사용 운임 | `long` | `use_fare` |
+| `refundCancelFee` | 환불 취소 수수료 | `long` | `refund_cancel_fee` |
+| `refundFee` | 환불 수수료 | `long` | `refund_fee` |
+| `cashRefundAmount` | 현금 환불 금액 | `long` | `refund_cash_amt` |
+| `cardRefundAmount` | 카드 환불 금액 | `long` | `refund_card_amt` |
+| `taxRefundAmount` | 세금 환불 금액 | `long` | `refund_tax_amt` |
+| `tasfRefundAmount` | TASF 환불 금액 | `long` | `refund_tasf_amt` |
+| `customerRefundAmount` | 고객 환불 금액 | `long` | `cust_refund_amt` |
+| `refundNo` | 환불 번호 | `String` | `refund_no` |
+| `refundReasonCode` | 환불 사유 코드 | `String` | `refund_resn_cd` |
+| `refundReason` | 환불 사유 | `String` | `refund_resn` |
+| `penaltyFee` | 위약금 | | 예약 취소/변경 시 위약금 |
+| `cancelPenaltyFees` | 취소 위약금 목록 | `List` | 승객별 위약금 |
+| `waiverCode` | Waiver 코드 | `String` | 항공사 면제 코드. `waiver_cd` |
+| `esac` | ESAC | `String` | Electronic Settlement Authorization Code |
+| `couponNo` | 쿠폰 번호 | `String` | 환불 쿠폰. `cpn_no` |
+| `isAirlineRefund` | 항공사 직접 환불 여부 | `boolean` | `air_refund_yn` |
+
+---
+
+## 규정 (Regulation)
+
+| code | description | type | 비고 |
+|------|-------------|------|------|
+| `regulation` | 운임 규정 | | 항공권 사용 조건/규칙 |
+| `regulationGroup` | 규정 그룹 | | 규정 묶음 단위 |
+| `fareRegulationType` | 운임 규정 유형 | `FareRegulationType` | 아래 참조 |
+
+### FareRegulationType (운임 규정 유형)
+
+| code | description |
+|------|-------------|
+| `COMMON` | 일반 규정 |
+| `BAGGAGE` | 수하물 규정 |
+| `REFUND_AND_CHANGE` | 환불/변경 규정 |
+| `MILEAGE` | 마일리지 규정 |
+| `OTHER` | 기타 규정 |
+
+---
+
+## 부가서비스 (Ancillary)
+
+| code | description | type | 비고 |
+|------|-------------|------|------|
+| `ancillary` | 부가서비스 | | 항공권 외 추가 서비스 |
+| `checkedBaggage` | 위탁 수하물 | `String` | 화물칸 수하물. `bagg` |
+| `includedCheckedBags` | 포함된 위탁 수하물 | | 운임에 포함된 수하물 |
+| `includedCabinBags` | 포함된 기내 수하물 | | 운임에 포함된 기내 수하물 |
+| `freeBaggage` | 무료 수하물 여부 | `Boolean` | 무료 수하물 포함 운임 필터 |
+| `baggageAllowance` | 수하물 허용량 | | quantity, weight, unit |
+| `seatDesignator` | 좌석 지정 | `String` | 좌석 번호 (예: 12A) |
+| `ssrCode` | SSR 코드 | `String` | Special Service Request 코드 |
+
+---
+
+## 이름 (Name)
+
+| code | description | type | 비고 |
+|------|-------------|------|------|
+| `firstName` | 이름 (Given Name) | `String` | 영문 이름. `pax_eng_nm` |
+| `lastName` | 성 (Family Name) | `String` | 영문 성. `pax_eng_fmnm` |
+| `paxName` | 탑승자 이름 | `String` | |
+| `reservant` | 예약자 이름 | `String` | 예약 담당자 |
+| `koreanName` | 한국어 이름 | `String` | `pax_kor_nm` |
+
+---
+
+## 서류 (Document)
+
+| code | description | type | 비고 |
+|------|-------------|------|------|
+| `documentType` | 서류 유형 | `TravelerDocumentType` | 아래 참조 |
+| `passportNo` | 여권 번호 | `String` | (암호화). `pp_no` |
+| `passportIssueCountry` | 여권 발급 국가 | `String` | `pp_pblicte_na_cd` |
+| `passportExpireDate` | 여권 만료일 | `String` | `pp_expire_date` |
+| `visaNo` | 비자 번호 | `String` | |
+| `visaIssueCountry` | 비자 발급 국가 | `String` | `visa_pblicte_na_cd` |
+| `visaEndDate` | 비자 만료일 | `String` | `visa_end_date` |
+| `isVisaIssued` | 비자 발급 여부 | `boolean` | `visa_issue_yn` |
+| `isPassportInfoDeferred` | 여권 정보 후등록 여부 | `boolean` | `lar_reg_yn` |
+| `requiresProofDocument` | 증빙 서류 필요 여부 | `boolean` | `proof_doc_require_yn` |
+| `isProofDocumentConfirmed` | 증빙 서류 확인 여부 | `boolean` | `proof_doc_confm_yn` |
+
+### TravelerDocumentType (여행자 서류 유형)
+
+| code | description |
+|------|-------------|
+| `ID_CARD` | 신분증 |
+| `DRIVER_LICENSE` | 운전면허증 |
+| `PASSPORT` | 여권 |
+| `VISA` | 비자 |
+
+---
+
+## 상태 코드 (Status)
+
+### ReservationStatus (예약 상태)
+
+| code | description |
+|------|-------------|
+| `WAITING` | 예약 대기 (미처리) |
+| `RESERVED` | 예약 확정 (미결제) |
+| `IN_PAY` | 발권 대상 (결제 진행 중) |
+| `CONFIRMED` | 발권 완료 (결제 완료) |
+| `NOT_PAID_CONFIRMED` | 미결제 발권 완료 |
+| `CANCELLED` | 예약 취소 |
+
+### IssueStatus (발권 상태)
+
+| code | description |
+|------|-------------|
+| `WAITING` | 발권 대기 (미발권) |
+| `REQUESTED` | 발권 요청 |
+| `REJECTED` | 발권 반려 |
+| `REISSUE` | 재발권 |
+| `ISSUED` | 발권 완료 |
+| `CANCELLED` | 발권 취소 |
+| `ERROR` | 발권 오류 |
+
+### PayStatus (결제 상태)
+
+| code | description |
+|------|-------------|
+| `WAITING` | 결제 요청 전 |
+| `REQUESTED` | 결제 요청 |
+| `PAYED` | 결제 완료 |
+| `CANCELLED` | 결제 취소 |
+
+### SeatStatus (좌석 상태)
+
+| code | description |
+|------|-------------|
+| `REQUESTED` | 요청 |
+| `CONFIRMED` | 확약 |
+| `CANCELLED` | 취소 |
+| `WAIT` | 대기 |
+| `CLOSED_WAIT` | 대기 마감 |
+
+### SegmentStatus (구간 예약 상태)
+
+| code | description |
+|------|-------------|
+| `PENDING` | 예약 진행 중 |
+| `CONFIRMED` | 예약 확정 |
+| `CANCELLED` | 예약 취소 |
+| `WAITLISTED` | 대기자 명단 등록 |
+| `DENIED` | 예약 거부 |
+
+### SegmentSeatStatus (구간 좌석 상태 - GDS)
+
+| code | description | 설명 |
+|------|-------------|------|
+| `HK` | Holding Confirmed | 확정 |
+| `HL` | Holding Waitlist | 대기 |
+| `HN` | Holding Need | 요청 전송됨 |
+| `HX` | Holding Cancelled | 항공사에 의해 취소 |
+| `UC` | Unable to Confirm | 확정 불가 |
+| `UN` | Unable No Flight | 미운항 |
+| `US` | Unable to Sell | 판매 불가 |
+| `TK` | Ticket Schedule Changed | 스케줄 변경됨 |
+| `TL` | Ticket Time Limit | 발권 시한 |
+| `WK` | Was Confirmed Cancelled | 확정 후 취소됨 |
+| `XX` | Cancelled by System | GDS에 의해 취소 |
+| `RL` | Request Waitlist | 대기 요청 |
+| `RR` | Reconfirmed | 재확인 |
+| `DS` | Schedule Changed | 스케줄 변경 |
+| `SC` | Space Confirmed | 좌석 확정 |
+
+### ChangeStatusCode (변경 이력 유형)
+
+| code | description |
+|------|-------------|
+| `CHSST` | 예약 상태 변경 |
+| `CHTK1` | 발권 상태 변경 |
+| `CHRVN` | PNR 좌석 상태 변경 |
+| `CHSCH` | 스케줄 변경 |
+| `CHSTA` | 세그먼트 좌석 상태 변경 |
+
+---
+
+## 시스템 (System)
+
+| code | description | type | 비고 |
+|------|-------------|------|------|
+| `fareSource` | 운임 공급 시스템 | `FareSource` | 아래 참조 |
+| `gdsCode` | GDS 코드 | `String` | Global Distribution System 식별자 |
+| `pnrSeq` | PNR 일련번호 | `long` | `pnr_seqno` |
+| `externalOrderId` | 외부 주문 ID | `String` | 외부 시스템 예약 번호. `if_sys_rsv_no` |
+| `ndcAggregator` | NDC 어그리게이터 | `String` | NDC 중계 시스템. `ndc_agrgt` |
+| `b2bPartnershipCompanyCode` | B2B 제휴사 코드 | `String` | `b2b_cpr_cd` |
+| `channelCode` | 채널 코드 | `String` | 판매 채널. `bplc_cd` |
+| `businessCode` | 거래처 코드 | `String` | `bcnc_cd` |
+
+### FareSource (운임 공급 소스)
+
+| code | description |
+|------|-------------|
+| `AMADEUS` | Amadeus GDS |
+| `JEJU_AIR` | 제주항공 직연동 |
+| `TWAY_AIR` | 티웨이항공 직연동 |
+| `ONEFLY` | 원플라이 (LCC 통합) |
+
+---
+
+## 용어 약어 사전
+
+| 약어 | 원문 | 한글 |
+|------|------|------|
+| PNR | Passenger Name Record | 승객 예약 기록 |
+| GDS | Global Distribution System | 글로벌 유통 시스템 |
+| NDC | New Distribution Capability | 신유통채널 |
+| BSP | Bank Settlement Plan | 은행 정산 체계 |
+| IATA | International Air Transport Association | 국제항공운송협회 |
+| ICAO | International Civil Aviation Organization | 국제민간항공기구 |
+| APIS | Advance Passenger Information System | 사전 승객 정보 시스템 |
+| TASF | Ticketing Agency Service Fee | 발권 대행 수수료 |
+| BAF | Bunker Adjustment Factor | 유류 할증료 |
+| SSR | Special Service Request | 특별 서비스 요청 |
+| EMD | Electronic Miscellaneous Document | 전자 기타 문서 |
+| DSR | Daily Sales Report | 일별 판매 보고서 |
+| FOP | Form of Payment | 결제 수단 |
+| PCC | Point of Sale Control | 판매 지점 제어 |
+| ESAC | Electronic Settlement Authorization Code | 전자 정산 인증 코드 |
+| ADT | Adult | 성인 |
+| CHD | Child | 소아 |
+| INF | Infant | 유아 |
+| PAX | Passenger | 승객 |
+| LCC | Low-Cost Carrier | 저가 항공사 |
+| FSC | Full-Service Carrier | 대형 항공사 |
+| IROP | Irregular Operations | 비정상 운항 |
+| ATC | Agency Ticketing Control | 대리점 발권 제어 |
+
+---
+
+## 네이밍 컨벤션 요약
+
+### 시간 관련 필드 접미사
+
+| 접미사 | 타입 | 예시 |
+|--------|------|------|
+| `At` | `LocalDateTime` | `departureAt`, `reservedAt`, `cancelledAt` |
+| `Date` | `LocalDate` | `departureDate`, `issueDate` |
+| `Time` | `LocalTime` | `departureTime`, `arrivalTime` |
+
+### Boolean 필드 접두사
+
+| 접두사 | 예시 |
+|--------|------|
+| `is` | `isTransfer`, `isDestination`, `isCancelled`, `isNdcReservation` |
+| `has` | `hasInfant`, `hasScheduleChange` |
+| `requires` | `requiresProofDocument` |
+
+### 금액 관련 필드 접미사
+
+| 접미사 | 예시 |
+|--------|------|
+| `Amount` | `refundAmount`, `cashPayAmount`, `cardPayAmount` |
+| `Price` | `finalPrice`, `farePrice` |
+| `Fee` | `reissueFee`, `penaltyFee`, `refundFee` |
+| `Fare` | `iataFare`, `mspFare`, `refundFare` |
+
+### 코드/식별자 관련 필드 접미사
+
+| 접미사 | 예시 |
+|--------|------|
+| `No` | `reservationNo`, `flightNo`, `ticketNo`, `passportNo` |
+| `Id` | `orderId`, `passengerId`, `ndcOrderId` |
+| `Code` | `gdsCode`, `airlineAllianceCode`, `areaCode` |
+| `Key` | `confirmKey`, `orderKey`, `cacheKey` |

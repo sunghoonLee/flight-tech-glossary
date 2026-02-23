@@ -88,7 +88,8 @@
             "icon": "graduation-cap",
             "pages": [
               "reference/gds-terminology",
-              "reference/bsp-settlement-guide"
+              "reference/bsp-settlement-guide",
+              "reference/mars-code-convention"
             ]
           }
         ]
