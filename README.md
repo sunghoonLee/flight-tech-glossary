@@ -12,6 +12,7 @@ https://sunghoonlee.mintlify.app/
 |---------|------|------------|
 | GDS 용어집 | Sabre & Amadeus GDS 시스템 용어 | PNR, PCC, OID, BSP, Webservice, WSAP |
 | BSP 정산 가이드 | IATA BSP 정산 프로세스 전체 가이드 | ADM, ACM, DSR, Billing, NDC, RBD |
+| Mars 코드 컨벤션 용어집 | Mars 프로젝트 코드베이스 기반 네이밍 컨벤션 | Route, Airport, Fare, Cabin, Reservation, Traveler |
 
 ### Amadeus
 
