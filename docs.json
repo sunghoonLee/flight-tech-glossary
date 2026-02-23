@@ -62,6 +62,14 @@
               "post-issuance/sales-reports",
               "post-issuance/cancellation-flow"
             ]
+          },
+          {
+            "group": "보조 API",
+            "icon": "puzzle-piece",
+            "pages": [
+              "reference/air-flightinfo",
+              "reference/fare-get-fare-rules"
+            ]
           }
         ]
       },
@@ -81,14 +89,6 @@
             "pages": [
               "reference/gds-terminology",
               "reference/bsp-settlement-guide"
-            ]
-          },
-          {
-            "group": "보조 API",
-            "icon": "puzzle-piece",
-            "pages": [
-              "reference/air-flightinfo",
-              "reference/fare-get-fare-rules"
             ]
           }
         ]
